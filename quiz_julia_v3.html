@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Quiz da Julia 📚</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --purple:#7C3AED;--purple-dark:#5B21B6;--purple-light:#EDE9FE;
+  --pink:#EC4899;--pink-light:#FCE7F3;
+  --teal:#0D9488;--teal-light:#CCFBF1;--teal-dark:#0F766E;
+  --amber:#D97706;--amber-light:#FEF3C7;
+  --green:#10B981;--green-light:#D1FAE5;
+  --red:#EF4444;--red-light:#FEF2F2;
+  --orange:#F97316;--orange-light:#FFF7ED;
+  --blue:#3B82F6;--blue-light:#EFF6FF;
+  --bg:#F8F7FF;--white:#FFFFFF;
+  --text:#1E1B4B;--text-muted:#6B7280;--border:#E5E7EB;
+  --radius:18px;--radius-sm:12px;
+  --shadow:0 4px 20px rgba(124,58,237,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* SELECT */
+#screen-select{background:linear-gradient(160deg,#5B21B6 0%,#7C3AED 35%,#0D9488 75%,#0F766E 100%);align-items:center;justify-content:center;padding:2rem 1.5rem;text-align:center;position:relative;overflow:hidden;}
+#screen-select::before{pointer-events:none;content:'';position:absolute;top:-80px;right:-80px;width:260px;height:260px;background:rgba(255,255,255,0.07);border-radius:50%;}
+#screen-select::after{pointer-events:none;content:'';position:absolute;bottom:-60px;left:-60px;width:200px;height:200px;background:rgba(255,255,255,0.05);border-radius:50%;}
+.sel-wrap{position:relative;z-index:10;width:100%;max-width:400px;}
+.sel-icon{font-size:72px;display:block;animation:float 3s ease-in-out infinite;margin-bottom:.75rem;}
+
+button{font-family:inherit;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.sel-title{font-family:'Baloo 2',sans-serif;font-size:28px;font-weight:800;color:white;margin-bottom:.4rem;}
+.sel-sub{font-size:15px;color:rgba(255,255,255,0.88);margin-bottom:1.75rem;line-height:1.5;}
+.subj-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:1.5rem;}
+.subj-card{appearance:none;-webkit-appearance:none;text-align:left;font-family:inherit;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:var(--radius);padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:background .2s,transform .15s,border-color .2s;}
+.subj-card:active{transform:scale(0.97);}
+.subj-card.sel{background:white;border-color:white;}
+.subj-card.sel .sc-name{color:var(--text);}
+.subj-card.sel .sc-desc{color:var(--text-muted);}
+.sc-ico{font-size:36px;flex-shrink:0;}
+.sc-name{font-family:'Baloo 2',sans-serif;font-size:18px;font-weight:800;color:white;line-height:1.2;}
+.sc-desc{font-size:12px;color:rgba(255,255,255,0.75);font-weight:600;margin-top:2px;}
+.btn-play{width:100%;background:white;border:none;border-radius:var(--radius);padding:17px;font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:800;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,0.15);transition:transform .15s,opacity .15s;opacity:.5;pointer-events:none;color:#5B21B6;}
+.btn-play.rdy{opacity:1;pointer-events:all;}
+.btn-play.rdy:active{transform:scale(0.97);}
+
+/* QUIZ */
+#screen-quiz{background:var(--bg);}
+.qhdr{background:white;padding:1rem 1.25rem .75rem;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(124,58,237,0.07);}
+.htop{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;}
+.qcnt{font-size:13px;font-weight:700;color:var(--text-muted);}
+.spill{border-radius:20px;padding:4px 12px;font-size:13px;font-weight:800;display:flex;align-items:center;gap:4px;}
+.ptrk{height:10px;background:var(--border);border-radius:99px;overflow:hidden;}
+.pfill{height:100%;border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.qbody{flex:1;padding:1.25rem 1rem 6rem;overflow-y:auto;}
+.rtry{background:#FFFBEB;border:1px solid var(--amber);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;font-weight:700;color:#78350F;margin-bottom:1rem;display:none;align-items:center;gap:8px;}
+.rtry.on{display:flex;}
+.qcard{background:white;border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow);margin-bottom:1rem;border:1.5px solid var(--border);}
+.qbadge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.5px;}
+.bm{background:var(--blue-light);color:#1D4ED8;}
+.bvf{background:var(--green-light);color:#065F46;}
+.bf{background:var(--amber-light);color:#78350F;}
+.ttag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;margin-left:6px;background:var(--pink-light);color:#9D174D;}
+.qemo{font-size:44px;text-align:center;margin-bottom:.6rem;display:block;}
+.qtxt{font-family:'Baloo 2',sans-serif;font-size:17px;font-weight:700;color:var(--text);line-height:1.45;margin-bottom:1rem;white-space:pre-line;}
+
+/* OPTIONS */
+.olist{display:flex;flex-direction:column;gap:9px;}
+.obtn{width:100%;background:var(--bg);border:2px solid var(--border);border-radius:var(--radius-sm);padding:13px 14px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;color:var(--text);cursor:pointer;text-align:left;display:flex;align-items:center;gap:11px;transition:border-color .15s,background .15s,transform .1s;line-height:1.3;}
+.obtn:active:not(:disabled){transform:scale(0.98);}
+.olet{width:30px;height:30px;border-radius:50%;background:white;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;color:var(--text-muted);}
+.obtn.cor{background:var(--green-light);border-color:var(--green);color:#064E3B;}
+.obtn.cor .olet{background:var(--green);border-color:var(--green);color:white;}
+.obtn.wrg{background:var(--red-light);border-color:var(--red);color:#7F1D1D;}
+.obtn.wrg .olet{background:var(--red);border-color:var(--red);color:white;}
+
+/* VF */
+.vfg{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.vfb{padding:17px 10px;border-radius:var(--radius-sm);font-family:'Baloo 2',sans-serif;font-size:16px;font-weight:800;cursor:pointer;border:2px solid var(--border);background:var(--bg);color:var(--text);transition:border-color .15s,background .15s,transform .1s;}
+.vfb:active:not(:disabled){transform:scale(0.97);}
+.vfb.cor{background:var(--green-light);border-color:var(--green);color:#064E3B;}
+.vfb.wrg{background:var(--red-light);border-color:var(--red);color:#7F1D1D;}
+
+/* FILL */
+.fwrap{display:flex;flex-direction:column;gap:10px;}
+.finp{width:100%;border:2px solid var(--border);border-radius:var(--radius-sm);padding:13px 15px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;color:var(--text);background:var(--bg);outline:none;transition:border-color .15s;}
+.finp:focus{border-color:var(--purple);background:white;}
+.finp.cor{border-color:var(--green);background:var(--green-light);color:#064E3B;}
+.finp.wrg{border-color:var(--red);background:var(--red-light);color:#7F1D1D;}
+.fconf{color:white;border:none;border-radius:var(--radius-sm);padding:13px;font-family:'Baloo 2',sans-serif;font-size:16px;font-weight:800;cursor:pointer;transition:opacity .15s,transform .1s;}
+.fconf:active{transform:scale(0.97);opacity:.9;}
+
+/* FEEDBACK */
+.fbk{border-radius:var(--radius-sm);padding:12px 14px;font-size:14px;font-weight:700;line-height:1.5;margin-top:12px;display:none;}
+.fbk.on{display:block;}
+.fbk.cor{background:var(--green-light);color:#064E3B;border:1.5px solid #6EE7B7;}
+.fbk.wrg{background:var(--red-light);color:#7F1D1D;border:1.5px solid #FCA5A5;}
+
+/* NEXT */
+.nxtwrap{position:fixed;bottom:0;left:0;right:0;padding:1rem;background:linear-gradient(transparent,var(--bg) 30%);display:none;}
+.nxtwrap.on{display:block;}
+.nxtbtn{width:100%;color:white;border:none;border-radius:var(--radius);padding:17px;font-family:'Baloo 2',sans-serif;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,0.2);transition:transform .1s,opacity .15s;}
+.nxtbtn:active{transform:scale(0.98);opacity:.9;}
+
+/* FINAL */
+#screen-final{background:var(--bg);align-items:flex-start;padding:0;overflow-y:auto;}
+.fin-in{width:100%;max-width:480px;margin:0 auto;padding:1.5rem 1rem 4rem;}
+.fin-hero{text-align:center;border-radius:var(--radius);padding:1.75rem 1rem;margin-bottom:1.25rem;position:relative;overflow:hidden;}
+.fin-hero::before{pointer-events:none;content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:rgba(255,255,255,0.12);border-radius:50%;}
+.trp{font-size:64px;display:block;animation:float 2.5s ease-in-out infinite;}
+.fstars{font-size:26px;letter-spacing:4px;margin:.5rem 0;display:block;}
+.ftitle{font-family:'Baloo 2',sans-serif;font-size:24px;font-weight:800;color:white;margin-bottom:.3rem;}
+.fsubt{font-size:14px;color:rgba(255,255,255,0.88);line-height:1.5;}
+.scards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem;}
+.scard{background:white;border-radius:var(--radius-sm);padding:14px 8px;text-align:center;border:1.5px solid var(--border);box-shadow:var(--shadow);}
+.snum{font-family:'Baloo 2',sans-serif;font-size:26px;font-weight:800;color:var(--text);display:block;}
+.slbl{font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;}
+.stit{font-family:'Baloo 2',sans-serif;font-size:16px;font-weight:800;color:var(--text);margin-bottom:.75rem;display:flex;align-items:center;gap:8px;}
+.tcards{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem;}
+.tcard{background:white;border-radius:var(--radius-sm);padding:12px 14px;border:1.5px solid var(--border);box-shadow:var(--shadow);}
+.thdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.tname{font-size:14px;font-weight:800;color:var(--text);}
+.tbadge{font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;}
+.bok{background:var(--green-light);color:#064E3B;}
+.brev{background:var(--orange-light);color:#7C2D12;}
+.tbar{height:8px;background:var(--bg);border-radius:99px;overflow:hidden;margin-bottom:6px;}
+.tfill{height:100%;border-radius:99px;transition:width .8s;}
+.ttip{font-size:12px;color:var(--text-muted);font-weight:600;line-height:1.4;}
+.wlist{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;}
+.witem{background:white;border-radius:var(--radius-sm);padding:12px 14px;border:1.5px solid #FECACA;border-left:4px solid var(--red);}
+.wq{font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px;line-height:1.3;}
+.wans{font-size:12px;color:#064E3B;font-weight:700;background:var(--green-light);padding:4px 8px;border-radius:6px;display:inline-block;margin-top:2px;line-height:1.4;}
+.abtns{display:flex;flex-direction:column;gap:10px;}
+.bpdf{width:100%;background:white;border:2px solid;border-radius:var(--radius);padding:15px;font-family:'Baloo 2',sans-serif;font-size:17px;font-weight:800;cursor:pointer;transition:background .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.bpdf:active{transform:scale(0.98);}
+.bplay{width:100%;color:white;border:none;border-radius:var(--radius);padding:17px;font-family:'Baloo 2',sans-serif;font-size:18px;font-weight:800;cursor:pointer;transition:transform .1s,opacity .15s;}
+.bplay:active{transform:scale(0.98);opacity:.9;}
+.bchange{width:100%;background:white;border:2px solid var(--border);border-radius:var(--radius);padding:15px;font-family:'Baloo 2',sans-serif;font-size:16px;font-weight:800;cursor:pointer;color:var(--text-muted);}
+@media print{#screen-select,#screen-quiz,.bpdf,.bplay,.bchange,.nxtwrap{display:none!important;}#screen-final{display:block!important;padding:0;}.fin-in{padding:0;}body{background:white;}}
+</style>
+</head>
+<body>
+
+<div id="screen-select" class="screen active">
+  <div class="sel-wrap">
+    <span class="sel-icon">📚</span>
+    <div class="sel-title">Quiz da Julia!</div>
+    <div class="sel-sub">Olá, Julia! Escolha a matéria que deseja revisar hoje para a prova!</div>
+    <div class="subj-cards">
+      <button type="button" class="subj-card" onclick="selSubj('hist')" ontouchend="event.preventDefault();selSubj('hist')" id="card-hist">
+        <span class="sc-ico">🏛️</span>
+        <div><div class="sc-name">História</div><div class="sc-desc">Povos antigos da América e Antigo Oriente Próximo</div></div>
+      </button>
+      <button type="button" class="subj-card" onclick="selSubj('lit')" ontouchend="event.preventDefault();selSubj('lit')" id="card-lit">
+        <span class="sc-ico">📰</span>
+        <div><div class="sc-name">Literatura</div><div class="sc-desc">Gênero notícia, fotorreportagem e características</div></div>
+      </button>
+    </div>
+    <button class="btn-play" id="btn-play" onclick="startGame()" ontouchend="event.preventDefault();startGame()">Iniciar Quiz! 🚀</button>
+  </div>
+</div>
+
+<div id="screen-quiz" class="screen">
+  <div class="qhdr">
+    <div class="htop">
+      <span class="qcnt" id="qcnt">Pergunta 1 de 15</span>
+      <div class="spill" id="spill">⭐ <span id="sdisp">0</span> pts</div>
+    </div>
+    <div class="ptrk"><div class="pfill" id="pfill" style="width:0%"></div></div>
+  </div>
+  <div class="qbody">
+    <div class="rtry" id="rtry">🔄 Você errou essa antes — tente novamente! 💪</div>
+    <div class="qcard">
+      <div id="bdgarea"></div>
+      <span class="qemo" id="qemo"></span>
+      <div class="qtxt" id="qtxt"></div>
+      <div id="ansarea"></div>
+      <div class="fbk" id="fbk"></div>
+    </div>
+  </div>
+  <div class="nxtwrap" id="nxtwrap">
+    <button class="nxtbtn" id="nxtbtn" onclick="nextQ()" ontouchend="event.preventDefault();nextQ()">Próxima pergunta →</button>
+  </div>
+</div>
+
+<div id="screen-final" class="screen">
+  <div class="fin-in">
+    <div class="fin-hero" id="fin-hero">
+      <span class="trp" id="fin-emo">🏆</span>
+      <span class="fstars" id="fin-stars">⭐⭐⭐⭐⭐</span>
+      <div class="ftitle" id="fin-title">Parabéns, Julia!</div>
+      <div class="fsubt" id="fin-sub"></div>
+    </div>
+    <div class="scards">
+      <div class="scard"><span class="snum" id="fpts">0</span><span class="slbl">Pontos</span></div>
+      <div class="scard"><span class="snum" id="fcor">0</span><span class="slbl">Certas</span></div>
+      <div class="scard"><span class="snum" id="fpct">0%</span><span class="slbl">Acerto</span></div>
+    </div>
+    <div class="stit">📊 Resultado por tema</div>
+    <div class="tcards" id="tcards"></div>
+    <div id="wsec" style="display:none">
+      <div class="stit">📝 Questões para revisar</div>
+      <div class="wlist" id="wlist"></div>
+    </div>
+    <div class="abtns">
+      <button class="bpdf" id="bpdf" onclick="dlPDF()" ontouchend="event.preventDefault();dlPDF()">📄 Baixar relatório em PDF</button>
+      <button class="bplay" id="bplay" onclick="restart()" ontouchend="event.preventDefault();restart()">🔄 Jogar de novo!</button>
+      <button class="bchange" onclick="changeSubj()" ontouchend="event.preventDefault();changeSubj()">📚 Escolher outra matéria</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const SUBJ={
+  hist:{name:"História",ico:"🏛️",grad:"linear-gradient(135deg,#0D9488,#5B21B6)",pill:{bg:"#CCFBF1",bo:"#5EEAD4",co:"#0F766E"},hc:[13,148,136]},
+  lit:{name:"Literatura",ico:"📰",grad:"linear-gradient(135deg,#7C3AED,#EC4899)",pill:{bg:"#EDE9FE",bo:"#C4B5FD",co:"#5B21B6"},hc:[124,58,237]}
+};
+
+const TIPS={
+  "Povos da América":"Revise Maias (América Central), Astecas (Mesoamérica/México) e Incas (América do Sul/Andes). Tupis vieram da Ásia pelo Estreito de Bering.",
+  "Antigo Oriente Próximo":"Estude Mesopotâmia (Sumérios, Babilônios), Egito Antigo, Fenícios e Hebreus — escrita, religião e organização social.",
+  "Gênero Notícia":"Notícia informa um fato real e recente. Elementos: título, lead (lide), corpo do texto, fonte. Responde: Quem? O quê? Quando? Onde? Por quê? Como?",
+  "Fotorreportagem":"Fotorreportagem narra um fato principalmente por imagens fotográficas com textos breves de legenda. Diferente da notícia comum, a imagem é o elemento central."
+};
+
+const QS={
+hist:[
+  // POVOS DA AMÉRICA
+  {type:"multi",emoji:"🏛️",theme:"Povos da América",text:"Qual das opções representa, respectivamente, as sociedades da Mesoamérica e da América Andina?",options:["Astecas e Incas","Tupis e Maias","Astecas e Maias","Tupis e Guaranis"],correct:0,explain:"Astecas = Mesoamérica (atual México). Incas = América Andina (cordilheira dos Andes, Peru). Maias = América Central."},
+  {type:"multi",emoji:"🏔️",theme:"Povos da América",text:"Qual fator explica a decadência dos Maias, que viveram na América Central antes da chegada dos europeus?",options:["A luta contra os Tupis","A invasão espanhola que estabeleceu dominação","Motivos naturais como seca e esgotamento ecológico","Nenhuma das alternativas anteriores"],correct:2,explain:"A decadência Maia está associada a fatores internos: seca prolongada, esgotamento ecológico e colapso agrícola — antes mesmo da chegada europeia."},
+  {type:"multi",emoji:"🦅",theme:"Povos da América",text:"A bandeira do México possui símbolos que remetem à mitologia asteca. Qual é a origem dessa simbologia?",options:["Representa a paz entre astecas e incas","Reflete a visão cristã trazida pelos espanhóis","Baseia-se na profecia asteca de fundar a capital onde vissem uma águia sobre um cacto devorando uma serpente","Simboliza a luta dos maias contra os astecas"],correct:2,explain:"A profecia asteca dizia que deveriam fundar sua cidade onde encontrassem uma águia pousada sobre um cacto devorando uma serpente — essa cena está na bandeira do México."},
+  {type:"multi",emoji:"🏙️",theme:"Povos da América",text:"A cidade de Tenochtitlán ficava em uma ilha no lago Texcoco. Como os astecas resolveram o problema de falta de terras cultiváveis?",options:["Cobrando impostos das cidades vizinhas","Com sistema de uso do solo três vezes mais fértil","Com as chinampas: ilhas artificiais flutuantes com matéria orgânica","Com adubo orgânico especial criado pelos astecas"],correct:2,explain:"As chinampas eram ilhas artificiais construídas sobre o lago com matéria orgânica, criando terras férteis para cultivo dentro da própria água."},
+  {type:"multi",emoji:"🦙",theme:"Povos da América",text:"Segundo a mitologia andina, as lhamas e alpacas eram consideradas presentes dos deuses. Qual era sua principal importância para os Incas?",options:["Eram usadas exclusivamente em cerimônias fúnebres","Forneciam transporte, lã e alimento — essenciais para a vida nos Andes","Eram usadas como moeda em transações com povos do litoral","Substituíam o cavalo nas guerras contra os colonizadores"],correct:1,explain:"Lhamas e alpacas eram fundamentais para os Incas: transporte de cargas nos Andes, lã para roupas e alimento (carne) — animais multiuso essenciais."},
+  {type:"multi",emoji:"📜",theme:"Povos da América",text:"Sobre o sistema de escrita Maia, é correto afirmar que:",options:["Era similar à escrita contemporânea com alfabeto","Era baseado em logogramas e glifos silábicos","Era igual aos hieróglifos egípcios sem relevância","Não possuíam — comunicação somente oral"],correct:1,explain:"A escrita Maia era complexa: combinava logogramas (símbolos que representam palavras) com glifos silábicos, formando um sistema sofisticado."},
+  {type:"multi",emoji:"🏛️",theme:"Povos da América",text:"Sobre a civilização Maia, é INCORRETO afirmar:",options:["Desenvolveu-se na América Central","Dividia-se em cidades-estado","Era uma sociedade com religião monoteísta","Sua economia era baseada na agricultura"],correct:2,explain:"INCORRETO: Os Maias eram POLITEÍSTAS — adoravam vários deuses. As outras afirmações estão corretas."},
+  {type:"multi",emoji:"🌽",theme:"Povos da América",text:"Sobre as civilizações pré-colombianas, qual afirmação é CORRETA?",options:["O Lago Texcoco era evitado pelos astecas por instabilidade","A economia inca era baseada no comércio marítimo e mineração de ouro","A bandeira do México representa lenda asteca de fundar a capital","Os tupis surgiram nos Andes e migraram ao litoral atlântico em busca de trigo"],correct:2,explain:"A bandeira do México representa a lenda asteca da águia sobre cacto com serpente — profecia que guiou a fundação de Tenochtitlán."},
+  {type:"multi",emoji:"🌏",theme:"Povos da América",text:"A teoria mais aceita sobre a origem dos povos tupis propõe que eram:",options:["Originários da região litorânea que expandiram para o interior","Civilização sedentária que nunca se deslocou","Grupos procedentes de migrações asiáticas que atravessaram o Estreito de Bering","Nenhuma das anteriores"],correct:2,explain:"A teoria mais aceita é que os povos tupis descendiam de grupos que migraram da Ásia para a América atravessando o Estreito de Bering na era glacial."},
+  {type:"vf",emoji:"🏛️",theme:"Povos da América",text:"VERDADEIRO ou FALSO:\nO termo 'pré-colombiano' tem sido criticado por reduzir a diversidade cultural dos povos indígenas, reforçando uma visão eurocêntrica da história.",correct:true,explain:"VERDADEIRO! 'Pré-colombiano' centra a narrativa na chegada europeia, ignorando a rica diversidade das civilizações americanas que existiam independentemente."},
+  {type:"vf",emoji:"🦅",theme:"Povos da América",text:"VERDADEIRO ou FALSO:\nOs Maias, Astecas e Incas são exemplos de civilizações pré-colombianas que desenvolveram formas complexas de organização social.",correct:true,explain:"VERDADEIRO! As três civilizações tinham sistemas políticos, religiosos, econômicos e culturais altamente desenvolvidos antes da chegada europeia."},
+  {type:"fill",emoji:"🏔️",theme:"Povos da América",text:"Os Incas se desenvolveram na cordilheira dos _______, na América do Sul.",answer:"Andes",accept:["andes","Andes"],explain:"Os Incas construíram seu império ao longo da Cordilheira dos Andes, incluindo os territórios do atual Peru, Bolívia e Chile."},
+  {type:"fill",emoji:"🏙️",theme:"Povos da América",text:"A capital do império asteca era a cidade de _______.",answer:"Tenochtitlán",accept:["tenochtitlan","tenochtitlán","Tenochtitlán","Tenochtitlan"],explain:"Tenochtitlán era a grandiosa capital asteca, construída sobre uma ilha no Lago Texcoco — atual Cidade do México."},
+  {type:"multi",emoji:"🌎",theme:"Povos da América",text:"Os Maias se desenvolveram principalmente em qual região?",options:["América do Sul — cordilheira dos Andes","América do Norte — planícies centrais","América Central — Yucatán, Guatemala e Belize","América do Sul — Amazônia brasileira"],correct:2,explain:"Os Maias ocuparam a América Central: Península de Yucatán (México), Guatemala, Belize e Honduras."},
+  {type:"vf",emoji:"🦙",theme:"Povos da América",text:"VERDADEIRO ou FALSO:\nOs Astecas construíram sua capital, Tenochtitlán, em uma ilha no meio de um lago.",correct:true,explain:"VERDADEIRO! Tenochtitlán foi construída numa ilha do Lago Texcoco — os astecas criaram chinampas para aumentar a área cultivável."},
+
+  // ANTIGO ORIENTE PRÓXIMO
+  {type:"multi",emoji:"🏺",theme:"Antigo Oriente Próximo",text:"A Mesopotâmia se desenvolveu entre dois grandes rios. Quais são eles?",options:["Nilo e Eufrates","Tigre e Nilo","Tigre e Eufrates","Indo e Ganges"],correct:2,explain:"Mesopotâmia significa 'terra entre rios' em grego: os rios Tigre e Eufrates (atual Iraque) foram fundamentais para o desenvolvimento das primeiras civilizações."},
+  {type:"multi",emoji:"📜",theme:"Antigo Oriente Próximo",text:"Qual foi o primeiro sistema de escrita desenvolvido pela humanidade, criado pelos Sumérios na Mesopotâmia?",options:["Hieróglifos","Alfabeto fenício","Escrita cuneiforme","Escrita ideográfica chinesa"],correct:2,explain:"A escrita cuneiforme, criada pelos Sumérios por volta de 3.500 a.C., é considerada a mais antiga forma de escrita — usava sinais em cunha gravados em argila."},
+  {type:"multi",emoji:"⚖️",theme:"Antigo Oriente Próximo",text:"O Código de Hamurabi é um importante documento histórico da Mesopotâmia. O que ele representa?",options:["Um mapa das rotas comerciais fenícias","Um dos primeiros conjuntos de leis escritas da história","Um tratado de paz entre Sumérios e Egípcios","Uma lista de faraós do Egito Antigo"],correct:1,explain:"O Código de Hamurabi (c. 1754 a.C.) é um dos primeiros conjuntos de leis escritas, criado pelo rei babilônico Hamurabi, com 282 leis que regulavam a vida na Babilônia."},
+  {type:"multi",emoji:"🔺",theme:"Antigo Oriente Próximo",text:"As pirâmides do Egito Antigo eram construídas com qual finalidade principal?",options:["Servir de depósito de alimentos para períodos de seca","Ser templos para cerimônias religiosas diárias","Ser túmulos para os faraós, garantindo sua vida após a morte","Demonstrar o poderio militar egípcio aos povos vizinhos"],correct:2,explain:"As pirâmides eram túmulos monumentais dos faraós. Os egípcios acreditavam na vida após a morte e preparavam as pirâmides para garantir a eternidade do faraó."},
+  {type:"multi",emoji:"🌊",theme:"Antigo Oriente Próximo",text:"Por que o Rio Nilo era tão importante para o Egito Antigo?",options:["Servia apenas como fronteira natural de proteção","Suas cheias anuais depositavam lodo fértil, possibilitando a agricultura","Era a principal rota de comércio marítimo com a Europa","Fornecia pedras para a construção das pirâmides"],correct:1,explain:"As cheias anuais do Nilo deixavam lodo fértil nas margens, tornando possível a agricultura no deserto — base econômica do Egito Antigo."},
+  {type:"multi",emoji:"⚓",theme:"Antigo Oriente Próximo",text:"Os Fenícios são conhecidos por qual grande contribuição para a humanidade?",options:["A construção das primeiras pirâmides","O desenvolvimento do alfabeto — base da escrita ocidental","A criação dos primeiros códigos de leis escritas","A invenção da roda e do arado"],correct:1,explain:"Os Fenícios criaram um dos primeiros alfabetos (c. 1050 a.C.), com cerca de 22 letras — base do alfabeto grego, latino e de praticamente todas as escritas ocidentais."},
+  {type:"multi",emoji:"✡️",theme:"Antigo Oriente Próximo",text:"Qual característica tornava os Hebreus diferentes dos outros povos do Antigo Oriente Próximo?",options:["Eram o povo com maior exército da região","Praticavam o monoteísmo — crença em um único Deus","Construíram os maiores templos da Antiguidade","Foram os primeiros a desenvolver o comércio marítimo"],correct:1,explain:"Os Hebreus eram monoteístas — acreditavam em um único Deus (Javé/Yahweh). Isso os distinguia dos povos vizinhos que praticavam o politeísmo."},
+  {type:"vf",emoji:"🏺",theme:"Antigo Oriente Próximo",text:"VERDADEIRO ou FALSO:\nA Mesopotâmia é considerada um dos berços da civilização humana.",correct:true,explain:"VERDADEIRO! A Mesopotâmia (entre os rios Tigre e Eufrates) foi uma das primeiras regiões com cidades, escrita, leis e organização estatal complexa."},
+  {type:"vf",emoji:"🔺",theme:"Antigo Oriente Próximo",text:"VERDADEIRO ou FALSO:\nOs faraós egípcios eram considerados deuses vivos pelos egípcios.",correct:true,explain:"VERDADEIRO! Os faraós eram vistos como deuses encarnados — intermediários entre os humanos e os deuses — o que justificava seu poder absoluto."},
+  {type:"fill",emoji:"📜",theme:"Antigo Oriente Próximo",text:"A escrita desenvolvida pelos Sumérios, usando sinais em formato de cunha gravados em argila, é chamada de escrita _______.",answer:"cuneiforme",accept:["cuneiforme"],explain:"A escrita cuneiforme (do latim 'cuneus' = cunha) foi criada pelos Sumérios por volta de 3.500 a.C. na Mesopotâmia."},
+  {type:"fill",emoji:"🌊",theme:"Antigo Oriente Próximo",text:"O grande rio que permitiu o desenvolvimento da civilização egípcia foi o Rio _______.",answer:"Nilo",accept:["nilo","Nilo"],explain:"O Rio Nilo, com suas cheias anuais fertilizando as margens, foi a base da civilização egípcia por milhares de anos."},
+  {type:"multi",emoji:"🏛️",theme:"Antigo Oriente Próximo",text:"Qual civilização do Antigo Oriente Próximo é conhecida pelos 'Jardins Suspensos', uma das Sete Maravilhas do Mundo Antigo?",options:["Egito (faraós)","Fenícios (comerciantes)","Babilônia (Nabucodonosor II)","Hebreus (Salomão)"],correct:2,explain:"Os Jardins Suspensos da Babilônia são atribuídos ao rei Nabucodonosor II, da Babilônia (atual Iraque), e são considerados uma das Sete Maravilhas do Mundo Antigo."},
+  {type:"multi",emoji:"🗺️",theme:"Antigo Oriente Próximo",text:"O que diferencia o Antigo Oriente Próximo das Américas pré-colombianas em termos históricos?",options:["O Oriente Próximo não tinha escrita","As Américas tinham tecnologia de ferro, o Oriente não","O Oriente Próximo se desenvolveu primeiro — inclui as primeiras cidades e escritas da humanidade","As Américas são mais antigas que a Mesopotâmia"],correct:2,explain:"O Antigo Oriente Próximo (Mesopotâmia, Egito) inclui as civilizações mais antigas: primeiras cidades (c. 4.000 a.C.), primeira escrita (c. 3.500 a.C.) e primeiras leis escritas."},
+],
+
+lit:[
+  // GÊNERO NOTÍCIA
+  {type:"multi",emoji:"📰",theme:"Gênero Notícia",text:"Qual é a principal finalidade de uma notícia de jornal?",options:["Anunciar uma ideia","Expor uma informação — relatar um fato real e recente ao público","Incentivar uma decisão","Narrar uma história fictícia"],correct:1,explain:"A notícia tem como principal finalidade INFORMAR — expor um fato real, recente e de interesse público de forma objetiva."},
+  {type:"multi",emoji:"📰",theme:"Gênero Notícia",text:"Qual é a fonte responsável pela divulgação inicial da notícia sobre Galvão Bueno retornando à Band?",options:["Jornal O Globo","Portal G1","Folha de S. Paulo","ESPN Brasil"],correct:2,explain:"Segundo o texto de referência, a informação foi divulgada inicialmente pela Folha de S. Paulo."},
+  {type:"multi",emoji:"📰",theme:"Gênero Notícia",text:"A informação principal de uma notícia pode geralmente ser encontrada:",options:["No último parágrafo","No título e no primeiro parágrafo (lide/lead)","Nas imagens e legendas","Nas fontes citadas ao final"],correct:1,explain:"O título e o primeiro parágrafo (lide) concentram a informação mais importante da notícia — respondem às perguntas básicas: Quem? O quê? Quando? Onde?"},
+  {type:"multi",emoji:"📝",theme:"Gênero Notícia",text:"O primeiro parágrafo da notícia, que resume as informações mais importantes do fato, é chamado de:",options:["Título","Lide (lead)","Corpo do texto","Legenda"],correct:1,explain:"O lide (do inglês 'lead') é o primeiro parágrafo da notícia. Ele resume o fato principal respondendo: Quem? O quê? Quando? Onde? Por quê? Como?"},
+  {type:"multi",emoji:"📰",theme:"Gênero Notícia",text:"A partir de uma notícia sobre a volta de Galvão Bueno à Band, é possível inferir que:",options:["A emissora pretende aumentar audiência com nome conhecido do público","Galvão Bueno deixou a Globo por divergências contratuais","O foco da Band será exclusivamente em transmissões de automobilismo","A volta de Galvão se deve à aposentadoria de Sérgio Maurício"],correct:0,explain:"A notícia permite inferir que a Band quer aumentar audiência com um nome famoso — Galvão Bueno é amplamente reconhecido pelo público."},
+  {type:"vf",emoji:"📰",theme:"Gênero Notícia",text:"VERDADEIRO ou FALSO:\nA notícia de jornal deve relatar fatos reais, recentes e de interesse público, com linguagem objetiva.",correct:true,explain:"VERDADEIRO! A notícia tem três características essenciais: fato REAL, fato RECENTE e linguagem OBJETIVA — sem opinião do jornalista."},
+  {type:"vf",emoji:"📰",theme:"Gênero Notícia",text:"VERDADEIRO ou FALSO:\nA notícia e o conto são textos do mesmo gênero, pois ambos narram eventos.",correct:false,explain:"FALSO! A notícia é um gênero jornalístico que narra fatos REAIS. O conto é um gênero literário com narrativa FICCIONAL. São gêneros completamente diferentes."},
+  {type:"multi",emoji:"✍️",theme:"Gênero Notícia",text:"Na notícia, a vírgula no trecho 'mesmo com a Band mantendo os direitos de transmissão da F1 em 2025 — que promete um ganho de audiência' tem a função de:",options:["Indicar uma pausa para o leitor refletir","Introduzir uma explicação sobre o que foi dito anteriormente","Marcar o discurso de quem está narrando","Substituir a vírgula para separar elementos"],correct:1,explain:"O travessão (—) aqui introduz uma explicação/adição ao que foi dito antes — indicando que a F1 em 2025 promete ganho de audiência para a Band."},
+  {type:"multi",emoji:"📰",theme:"Gênero Notícia",text:"Quais perguntas uma boa notícia deve responder em seu lide?",options:["Quem, o quê, quando, onde, por quê e como","Quem, como, onde e opinião do jornalista","Apenas o quê e quando aconteceu","O quê, por quê e a solução para o problema"],correct:0,explain:"O lide perfeito responde às 6 perguntas básicas do jornalismo: Quem? O quê? Quando? Onde? Por quê? Como? Isso garante a informação completa ao leitor."},
+  {type:"fill",emoji:"📰",theme:"Gênero Notícia",text:"O primeiro parágrafo da notícia que concentra as informações mais importantes é chamado de _______ (palavra em inglês também usada).",answer:"lide",accept:["lide","lead"],explain:"Lide (ou lead, em inglês) é o parágrafo inicial da notícia que resume o fato principal."},
+  {type:"vf",emoji:"📝",theme:"Gênero Notícia",text:"VERDADEIRO ou FALSO:\nNa notícia jornalística, o jornalista pode incluir livremente sua opinião pessoal sobre os fatos.",correct:false,explain:"FALSO! A notícia exige objetividade e imparcialidade — o jornalista relata os fatos sem opinar. Textos de opinião são outro gênero (editorial, artigo de opinião)."},
+  {type:"multi",emoji:"📰",theme:"Gênero Notícia",text:"A expressão 'Apesar do retorno à emissora, ele não voltará a narrar a categoria automobilística...' destaca:",options:["Uma consequência","Uma concessão — algo que acontece apesar de uma situação contrária","Uma causa","Uma finalidade"],correct:1,explain:"'Apesar de' indica CONCESSÃO: algo acontece (voltou à emissora) mas tem uma restrição oposta (não vai narrar F1). É uma relação de contraste/concessão."},
+
+  // FOTORREPORTAGEM
+  {type:"multi",emoji:"📷",theme:"Fotorreportagem",text:"O que é uma fotorreportagem?",options:["Uma notícia escrita acompanhada de uma única foto ilustrativa","Um gênero jornalístico que narra um fato principalmente por meio de fotografias com textos breves de legenda","Um ensaio fotográfico artístico sem compromisso com a realidade","Um álbum de fotos históricas sem texto"],correct:1,explain:"A fotorreportagem é um gênero jornalístico onde a FOTOGRAFIA é o elemento central da narrativa, acompanhada de legendas e textos breves que complementam as imagens."},
+  {type:"multi",emoji:"📷",theme:"Fotorreportagem",text:"Qual é a principal diferença entre uma notícia comum e uma fotorreportagem?",options:["A notícia é publicada em jornais; a fotorreportagem só em revistas","Na fotorreportagem, a imagem é o elemento central da narrativa; na notícia, o texto é o principal","A fotorreportagem não precisa ser verdadeira","A notícia é mais longa que a fotorreportagem"],correct:1,explain:"Na notícia, o TEXTO é o elemento principal. Na fotorreportagem, a FOTOGRAFIA é o centro — ela conta a história, e o texto (legenda) é complemento."},
+  {type:"multi",emoji:"📷",theme:"Fotorreportagem",text:"A legenda em uma fotorreportagem tem qual função?",options:["Substituir completamente o texto da notícia","Complementar a imagem com informações como quem, onde e quando","Apenas identificar o fotógrafo da imagem","Servir de título para toda a reportagem"],correct:1,explain:"A legenda complementa a fotografia, fornecendo informações contextuais: quem está na foto, onde foi tirada, quando e o que representa para a notícia."},
+  {type:"vf",emoji:"📷",theme:"Fotorreportagem",text:"VERDADEIRO ou FALSO:\nNa fotorreportagem, as fotografias precisam ser reais e retratar fatos verídicos.",correct:true,explain:"VERDADEIRO! A fotorreportagem é um gênero jornalístico — as fotos devem retratar fatos REAIS. Diferente da fotografia artística, aqui a veracidade é fundamental."},
+  {type:"vf",emoji:"📷",theme:"Fotorreportagem",text:"VERDADEIRO ou FALSO:\nUma fotorreportagem pode ser publicada tanto em jornais impressos quanto em meios digitais.",correct:true,explain:"VERDADEIRO! A fotorreportagem aparece em jornais, revistas, sites de notícias e redes sociais — o suporte muda, mas o gênero mantém suas características."},
+  {type:"multi",emoji:"📷",theme:"Fotorreportagem",text:"Qual publicação é conhecida por fotorreportagens de grande impacto visual sobre natureza e ciência?",options:["National Geographic","The Art Review Magazine","BBC News","Folha de S. Paulo"],correct:0,explain:"A National Geographic é mundialmente famosa por suas fotorreportagens de altíssima qualidade sobre natureza, ciência, culturas e exploração geográfica."},
+  {type:"fill",emoji:"📷",theme:"Fotorreportagem",text:"O texto curto que acompanha e explica uma foto em uma fotorreportagem é chamado de _______.",answer:"legenda",accept:["legenda"],explain:"A legenda é o texto breve que acompanha a fotografia, contextualizando a imagem com informações essenciais."},
+  {type:"multi",emoji:"📷",theme:"Fotorreportagem",text:"O que diferencia o fotógrafo jornalístico (fotojornalista) de um fotógrafo artístico?",options:["O fotojornalista usa câmeras melhores","O fotojornalista tem compromisso com a verdade e o registro de fatos reais; o artístico busca expressão estética","O fotojornalista nunca edita suas fotos","Não há diferença entre os dois"],correct:1,explain:"O fotojornalista compromete-se com a REALIDADE — registra fatos verdadeiros para informar. O fotógrafo artístico busca expressão estética, podendo manipular livremente a imagem."},
+]
+};
+
+const TOTAL=15;
+let curSubj=null,qs=[],idx=0,score=0,corr=0,wrng=0;
+let wq=[],wqs=[],answered=false,retry=false,total=15;
+let tstat={};
+
+function shuf(a){let b=[...a];for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function scr(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo(0,0);}
+
+function selSubj(s){
+  curSubj=s;
+  document.querySelectorAll('.subj-card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('card-'+s).classList.add('sel');
+  const btn=document.getElementById('btn-play');
+  btn.classList.add('rdy');
+  btn.textContent='Estudar '+SUBJ[s].name+'! 🚀';
+  btn.style.color=s==='hist'?'#0F766E':'#5B21B6';
+}
+
+function startGame(){
+  if(!curSubj)return;
+  const pool=QS[curSubj];
+  // ensure at least 7 from each theme when possible
+  const byTheme={};
+  pool.forEach(q=>{if(!byTheme[q.theme])byTheme[q.theme]=[];byTheme[q.theme].push(q);});
+  let picked=[];
+  Object.values(byTheme).forEach(arr=>{picked.push(...shuf(arr).slice(0,7));});
+  picked=shuf(picked).slice(0,TOTAL);
+  qs=picked;
+
+  idx=0;score=0;corr=0;wrng=0;wq=[];wqs=[];answered=false;retry=false;total=TOTAL;
+  tstat={};
+  qs.forEach(q=>{if(!tstat[q.theme])tstat[q.theme]={t:0,c:0};tstat[q.theme].t++;});
+
+  const sub=SUBJ[curSubj];
+  document.getElementById('pfill').style.background=sub.grad;
+  const sp=document.getElementById('spill');
+  sp.style.background=sub.pill.bg;sp.style.border='1px solid '+sub.pill.bo;sp.style.color=sub.pill.co;
+  document.getElementById('nxtbtn').style.background=sub.grad;
+  scr('quiz');renderQ();
+}
+
+
+function mkBtn(cls, html_content, clickFn) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = cls;
+  btn.innerHTML = html_content;
+  btn.onclick = clickFn;
+  btn.ontouchend = function(e){ e.preventDefault(); clickFn(); };
+  return btn;
+}
+function renderQ(){
+  const list=retry?wq:qs;
+  if(idx>=list.length){
+    if(!retry&&wq.length>0){retry=true;idx=0;renderQ();return;}
+    else if(retry){wq=wq.filter(q=>q._sw);wq.forEach(q=>delete q._sw);if(wq.length>0){idx=0;renderQ();return;}}
+    showFinal();return;
+  }
+  const q=list[idx];const tot=list.length;
+  document.getElementById('qcnt').textContent=(retry?'🔄 Revisando: ':'Pergunta ')+(idx+1)+' de '+tot;
+  document.getElementById('pfill').style.width=Math.round(((idx+1)/tot)*100)+'%';
+  document.getElementById('rtry').classList.toggle('on',retry);
+  document.getElementById('qemo').textContent=q.emoji;
+  document.getElementById('qtxt').textContent=q.text;
+
+  const sub=SUBJ[curSubj];
+  const ba=document.getElementById('bdgarea');
+  const tl=q.type==='multi'?'🔵 Múltipla escolha':q.type==='vf'?'🟢 Verdadeiro ou Falso':'🟡 Complete';
+  const bc=q.type==='multi'?'bm':q.type==='vf'?'bvf':'bf';
+  ba.innerHTML=`<span class="qbadge ${bc}">${tl}</span><span class="ttag">${q.theme}</span>`;
+
+  const aa=document.getElementById('ansarea');aa.innerHTML='';
+  answered=false;
+  document.getElementById('fbk').className='fbk';
+  document.getElementById('fbk').textContent='';
+  document.getElementById('nxtwrap').classList.remove('on');
+
+  if(q.type==='multi'){
+    const l=document.createElement('div');l.className='olist';
+    ['A','B','C','D'].forEach((lt,i)=>{
+      const btn=mkBtn('obtn',`<span class="olet">${lt}</span>${q.options[i]}`,()=>hMulti(i,q));l.appendChild(btn);
+    });aa.appendChild(l);
+  }else if(q.type==='vf'){
+    const g=document.createElement('div');g.className='vfg';
+    [['✅ Verdadeiro','vv',true],['❌ Falso','vf2',false]].forEach(([lb,cls,val])=>{
+      const btn=mkBtn('vfb '+cls,lb,()=>hVF(val,q));g.appendChild(btn);
+    });aa.appendChild(g);
+  }else{
+    const w=document.createElement('div');w.className='fwrap';
+    const inp=document.createElement('input');inp.type='text';inp.className='finp';inp.id='finp';
+    inp.placeholder='Digite sua resposta...';inp.onkeydown=e=>{if(e.key==='Enter')hFill(q);};
+    const btn=document.createElement('button');btn.type='button';btn.className='fconf';btn.textContent='✔ Confirmar';
+    btn.style.background=sub.grad;btn.onclick=()=>hFill(q);btn.ontouchend=(e)=>{e.preventDefault();hFill(q);};
+    w.appendChild(inp);w.appendChild(btn);aa.appendChild(w);
+    setTimeout(()=>inp.focus(),100);
+  }
+  document.getElementById('sdisp').textContent=score;
+}
+
+function hMulti(chosen,q){
+  if(answered)return;answered=true;
+  document.querySelectorAll('.obtn').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.correct)b.classList.add('cor');
+    else if(i===chosen)b.classList.add('wrg');
+  });
+  proc(chosen===q.correct,q);
+}
+function hVF(chosen,q){
+  if(answered)return;answered=true;
+  document.querySelectorAll('.vfb').forEach(b=>{
+    b.disabled=true;
+    const isT=b.classList.contains('vv');
+    if(isT===q.correct)b.classList.add('cor');
+    else if(isT===chosen)b.classList.add('wrg');
+  });
+  proc(chosen===q.correct,q);
+}
+function hFill(q){
+  if(answered)return;answered=true;
+  const inp=document.getElementById('finp');
+  const val=inp.value.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const ok=q.accept.some(a=>val===a.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+  inp.disabled=true;inp.classList.add(ok?'cor':'wrg');
+  document.querySelector('.fconf').disabled=true;
+  proc(ok,q);
+}
+
+function proc(ok,q){
+  const fb=document.getElementById('fbk');
+  if(ok){
+    score+=10;corr++;
+    fb.className='fbk cor on';fb.textContent='✅ Correto! '+q.explain;
+    if(!retry&&tstat[q.theme])tstat[q.theme].c++;
+    if(retry)q._sw=false;
+  }else{
+    wrng++;
+    fb.className='fbk wrg on';fb.textContent='💡 Não foi dessa vez! '+q.explain;
+    if(!retry){wq.push(q);wqs.push({text:q.text.replace(/\n/g,' '),explain:q.explain,theme:q.theme});}
+    else q._sw=true;
+  }
+  document.getElementById('nxtwrap').classList.add('on');
+  document.getElementById('sdisp').textContent=score;
+}
+
+function nextQ(){
+  idx++;
+  document.getElementById('nxtwrap').classList.remove('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(renderQ,200);
+}
+
+function showFinal(){
+  scr('final');
+  const sub=SUBJ[curSubj];
+  const pct=Math.round((corr/total)*100);
+  document.getElementById('fpts').textContent=score;
+  document.getElementById('fcor').textContent=corr;
+  document.getElementById('fpct').textContent=pct+'%';
+  let emo,ttl,stxt,stars;
+  if(pct===100){emo='🏆';ttl='Perfeito, Julia!';stxt='Você acertou tudo em '+sub.name+'! Está pronta para a prova! 🎉';stars='⭐⭐⭐⭐⭐';}
+  else if(pct>=80){emo='🥇';ttl='Muito bem, Julia!';stxt='Excelente resultado em '+sub.name+'! Revise os temas marcados. 💪';stars='⭐⭐⭐⭐☆';}
+  else if(pct>=60){emo='😊';ttl='Bom trabalho, Julia!';stxt='Você está no caminho! Foque nos temas para revisar. 📚';stars='⭐⭐⭐☆☆';}
+  else{emo='📖';ttl='Continue estudando, Julia!';stxt='Use as dicas abaixo e tente de novo. Você consegue! 💜';stars='⭐⭐☆☆☆';}
+  document.getElementById('fin-emo').textContent=emo;
+  document.getElementById('fin-title').textContent=ttl;
+  document.getElementById('fin-sub').textContent=stxt;
+  document.getElementById('fin-stars').textContent=stars;
+  document.getElementById('fin-hero').style.background=sub.grad;
+  document.getElementById('bplay').style.background=sub.grad;
+  document.getElementById('bplay').textContent='🔄 Jogar '+sub.name+' de novo!';
+  const bc='rgb('+sub.hc.join(',')+')';
+  document.getElementById('bpdf').style.borderColor=bc;
+  document.getElementById('bpdf').style.color=bc;
+
+  const tc=document.getElementById('tcards');tc.innerHTML='';
+  Object.entries(tstat).filter(([,v])=>v.t>0).forEach(([name,s])=>{
+    const pt=s.t>0?Math.round((s.c/s.t)*100):0;const ok=pt>=70;
+    const tip=TIPS[name]||'';
+    const card=document.createElement('div');card.className='tcard';
+    card.innerHTML=`<div class="thdr"><div class="tname">${name}</div><span class="tbadge ${ok?'bok':'brev'}">${ok?'✅ Ótimo':'📖 Revisar'}</span></div><div class="tbar"><div class="tfill" style="width:${pt}%;background:${ok?'var(--green)':'var(--orange)'}"></div></div><div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:${!ok?4:0}px">${s.c} de ${s.t} certas (${pt}%)</div>${!ok&&tip?`<div class="ttip">💡 ${tip}</div>`:''}`;
+    tc.appendChild(card);
+  });
+
+  if(wqs.length>0){
+    document.getElementById('wsec').style.display='block';
+    const wl=document.getElementById('wlist');wl.innerHTML='';
+    wqs.forEach(w=>{
+      const item=document.createElement('div');item.className='witem';
+      item.innerHTML=`<div class="wq">❓ ${w.text}</div><div class="wans">✅ ${w.explain}</div>`;
+      wl.appendChild(item);
+    });
+  }else document.getElementById('wsec').style.display='none';
+}
+
+function restart(){
+  idx=0;score=0;corr=0;wrng=0;wq=[];wqs=[];answered=false;retry=false;
+  tstat={};
+  const pool=QS[curSubj];
+  const byTheme={};
+  pool.forEach(q=>{if(!byTheme[q.theme])byTheme[q.theme]=[];byTheme[q.theme].push(q);});
+  let picked=[];
+  Object.values(byTheme).forEach(arr=>{picked.push(...shuf(arr).slice(0,7));});
+  qs=shuf(picked).slice(0,TOTAL);
+  qs.forEach(q=>{if(!tstat[q.theme])tstat[q.theme]={t:0,c:0};tstat[q.theme].t++;});
+  scr('quiz');renderQ();
+}
+
+function changeSubj(){
+  curSubj=null;
+  document.querySelectorAll('.subj-card').forEach(c=>c.classList.remove('sel'));
+  const btn=document.getElementById('btn-play');
+  btn.classList.remove('rdy');btn.textContent='Iniciar Quiz! 🚀';btn.style.color='#5B21B6';
+  scr('select');
+}
+
+function dlPDF(){
+  const sub=SUBJ[curSubj];
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+  const pw=doc.internal.pageSize.getWidth();
+  let y=15;const lm=15,rm=pw-15,cw=pw-30;
+  function chk(n){if(y+n>280){doc.addPage();y=15;}}
+  doc.setFillColor(...sub.hc);doc.rect(0,0,pw,28,'F');
+  doc.setFontSize(18);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+  doc.text('Relatorio - Julia | '+sub.name,lm,12);
+  doc.setFontSize(11);doc.setFont('helvetica','normal');
+  doc.text('Quiz Educacional - 6 ano do Ensino Fundamental',lm,20);
+  const now=new Date();
+  doc.text('Data: '+now.toLocaleDateString('pt-BR')+' as '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),lm,26);
+  y=35;
+  const pct=Math.round((corr/total)*100);
+  doc.setFillColor(240,248,255);doc.roundedRect(lm,y,cw,28,3,3,'F');
+  doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(30,27,75);
+  doc.text('Resultado Geral',lm+4,y+8);
+  doc.setFontSize(11);doc.setFont('helvetica','normal');
+  doc.text('Pontuacao: '+score+' pts',lm+4,y+16);
+  doc.text('Acertos: '+corr+' de '+total,lm+4,y+22);
+  doc.text('Percentual: '+pct+'%',lm+cw/2,y+16);
+  doc.text('Estrelas: '+(pct>=100?'*****':pct>=80?'**** ':pct>=60?'***  ':'**   '),lm+cw/2,y+22);
+  y+=34;
+  chk(20);doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(30,27,75);
+  doc.text('Resultado por Tema',lm,y);y+=8;
+  Object.entries(tstat).filter(([,v])=>v.t>0).forEach(([name,s])=>{
+    chk(18);const pt=s.t>0?Math.round((s.c/s.t)*100):0;const ok=pt>=70;
+    doc.setFillColor(ok?209:255,ok?250:237,ok?229:213);doc.roundedRect(lm,y,cw,14,2,2,'F');
+    doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,27,75);
+    doc.text(name,lm+3,y+6);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
+    doc.text(s.c+'/'+s.t+' ('+pt+'%)',lm+3,y+11);doc.setFont('helvetica','bold');
+    doc.setTextColor(ok?6:124,ok?78:45,ok?59:12);doc.text(ok?'Otimo!':'Revisar',rm-20,y+8);y+=17;
+  });
+  if(wqs.length>0){
+    chk(20);y+=4;doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(30,27,75);
+    doc.text('Questoes para Revisar',lm,y);y+=8;
+    wqs.forEach((w,i)=>{
+      const qL=doc.splitTextToSize((i+1)+'. '+w.text.replace(/\n/g,' '),cw-6);
+      const aL=doc.splitTextToSize('Explicacao: '+w.explain,cw-6);
+      const bh=(qL.length+aL.length)*4.5+8;chk(bh+4);
+      doc.setFillColor(254,242,242);doc.roundedRect(lm,y,cw,bh,2,2,'F');
+      doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,27,75);
+      doc.text(qL,lm+3,y+6);
+      doc.setFont('helvetica','normal');doc.setTextColor(6,78,59);
+      doc.text(aL,lm+3,y+6+(qL.length*4.3));y+=bh+4;
+    });
+  }
+  chk(12);y+=4;doc.setFontSize(9);doc.setFont('helvetica','italic');doc.setTextColor(150,150,150);
+  doc.text('Gerado pelo Quiz da Julia - Bons estudos!',lm,y);
+  doc.save('relatorio_julia_'+curSubj+'.pdf');
+}
+</script>
+</body>
+</html>
