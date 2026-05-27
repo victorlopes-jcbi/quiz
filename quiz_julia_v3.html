@@ -378,7 +378,7 @@ function startGame(){
   pool.forEach(q=>{if(!byTheme[q.theme])byTheme[q.theme]=[];byTheme[q.theme].push(q);});
   let picked=[];
   Object.values(byTheme).forEach(arr=>{picked.push(...shuf(arr).slice(0,7));});
-  picked=shuf(picked).slice(0,TOTAL);
+  picked=shuf(picked).slice(0,t);
   qs=picked;
 
   idx=0;score=0;corr=0;wrng=0;wq=[];wqs=[];answered=false;retry=false;total=t;
@@ -561,12 +561,13 @@ function showFinal(){
 function restart(){
   idx=0;score=0;corr=0;wrng=0;wq=[];wqs=[];answered=false;retry=false;
   tstat={};
+  const t=TOTAL[curSubj]||15;total=t;
   const pool=QS[curSubj];
   const byTheme={};
   pool.forEach(q=>{if(!byTheme[q.theme])byTheme[q.theme]=[];byTheme[q.theme].push(q);});
   let picked=[];
-  Object.values(byTheme).forEach(arr=>{picked.push(...shuf(arr).slice(0,7));});
-  qs=shuf(picked).slice(0,TOTAL);
+  Object.values(byTheme).forEach(arr=>{picked.push(...shuf(arr).slice(0,8));});
+  qs=shuf(picked).slice(0,t);
   qs.forEach(q=>{if(!tstat[q.theme])tstat[q.theme]={t:0,c:0};tstat[q.theme].t++;});
   scr('quiz');renderQ();
 }
