@@ -33,6 +33,10 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .sel-icon{font-size:72px;display:block;animation:float 3s ease-in-out infinite;margin-bottom:.75rem;}
 
 button{font-family:inherit;}
+.trans-btn{display:inline-flex;align-items:center;gap:5px;background:#EFF6FF;border:1.5px solid #93C5FD;border-radius:var(--radius-sm);padding:6px 14px;font-size:12px;font-weight:800;color:#1D4ED8;cursor:pointer;margin-bottom:8px;transition:background .15s;font-family:'Nunito',sans-serif;}
+.trans-btn:active{background:#DBEAFE;}
+.trans-box{background:#DBEAFE;border:1px solid #93C5FD;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:#1E3A8A;font-weight:700;margin-bottom:10px;display:none;line-height:1.5;white-space:pre-line;}
+.trans-box.show{display:block;}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .sel-title{font-family:'Baloo 2',sans-serif;font-size:28px;font-weight:800;color:white;margin-bottom:.4rem;}
 .sel-sub{font-size:15px;color:rgba(255,255,255,0.88);margin-bottom:1.75rem;line-height:1.5;}
@@ -160,6 +164,14 @@ button{font-family:inherit;}
         <span class="sc-ico">📰</span>
         <div><div class="sc-name">Literatura</div><div class="sc-desc">Gênero notícia, fotorreportagem e características</div></div>
       </button>
+      <button type="button" class="subj-card" onclick="selSubj('eng')" ontouchend="event.preventDefault();selSubj('eng')" id="card-eng">
+        <span class="sc-ico">🇬🇧</span>
+        <div><div class="sc-name">English</div><div class="sc-desc">School, prepositions, there is/are, classroom &amp; possession</div></div>
+      </button>
+      <button type="button" class="subj-card" onclick="selSubj('sci')" ontouchend="event.preventDefault();selSubj('sci')" id="card-sci">
+        <span class="sc-ico">🔬</span>
+        <div><div class="sc-name">Ciências</div><div class="sc-desc">Transformações físicas e químicas da matéria</div></div>
+      </button>
     </div>
     <button class="btn-play" id="btn-play" onclick="startGame()" ontouchend="event.preventDefault();startGame()">Iniciar Quiz! 🚀</button>
   </div>
@@ -219,14 +231,22 @@ button{font-family:inherit;}
 <script>
 const SUBJ={
   hist:{name:"História",ico:"🏛️",grad:"linear-gradient(135deg,#0D9488,#5B21B6)",pill:{bg:"#CCFBF1",bo:"#5EEAD4",co:"#0F766E"},hc:[13,148,136]},
-  lit:{name:"Literatura",ico:"📰",grad:"linear-gradient(135deg,#7C3AED,#EC4899)",pill:{bg:"#EDE9FE",bo:"#C4B5FD",co:"#5B21B6"},hc:[124,58,237]}
+  lit:{name:"Literatura",ico:"📰",grad:"linear-gradient(135deg,#7C3AED,#EC4899)",pill:{bg:"#EDE9FE",bo:"#C4B5FD",co:"#5B21B6"},hc:[124,58,237]},
+  eng:{name:"English",ico:"🇬🇧",grad:"linear-gradient(135deg,#1D4ED8,#0EA5E9)",pill:{bg:"#EFF6FF",bo:"#93C5FD",co:"#1D4ED8"},hc:[29,78,216]},
+  sci:{name:"Ciências",ico:"🔬",grad:"linear-gradient(135deg,#059669,#10B981)",pill:{bg:"#D1FAE5",bo:"#6EE7B7",co:"#065F46"},hc:[5,150,105]}
 };
 
 const TIPS={
   "Povos da América":"Revise Maias (América Central), Astecas (Mesoamérica/México) e Incas (América do Sul/Andes). Tupis vieram da Ásia pelo Estreito de Bering.",
   "Antigo Oriente Próximo":"Estude Mesopotâmia (Sumérios, Babilônios), Egito Antigo, Fenícios e Hebreus — escrita, religião e organização social.",
   "Gênero Notícia":"Notícia informa um fato real e recente. Elementos: título, lead (lide), corpo do texto, fonte. Responde: Quem? O quê? Quando? Onde? Por quê? Como?",
-  "Fotorreportagem":"Fotorreportagem narra um fato principalmente por imagens fotográficas com textos breves de legenda. Diferente da notícia comum, a imagem é o elemento central."
+  "Fotorreportagem":"Fotorreportagem narra um fato principalmente por imagens fotográficas com textos breves de legenda. Diferente da notícia comum, a imagem é o elemento central.",
+  "Places in a School":"library=biblioteca | cafeteria=cantina | gym=ginásio | lab=laboratório | principal's office=diretoria | classroom=sala de aula",
+  "Prepositions":"in=dentro | on=sobre | under=embaixo | next to=ao lado | behind=atrás | in front of=na frente",
+  "There is / There are":"There IS = há (singular). There ARE = há (plural). There ISN'T / There AREN'T = negativa.",
+  "Objects in a Classroom":"desk=carteira | chair=cadeira | whiteboard=quadro branco | chalkboard=quadro negro | window=janela | door=porta",
+  "Possession":"Possessive adjectives: my, your, his, her, our, their. Genitive case: Maria's book = o livro da Maria ('s).",
+  "Transformação da Matéria":"Transformação FÍSICA: não forma nova substância (derreter, cortar, dobrar). Transformação QUÍMICA: forma nova substância (queimar, enferrujar, cozinhar)."
 };
 
 const QS={
@@ -287,11 +307,51 @@ lit:[
   {type:"vf",emoji:"📷",theme:"Fotorreportagem",text:"VERDADEIRO ou FALSO:\nUma fotorreportagem pode ser publicada tanto em jornais impressos quanto em meios digitais.",correct:true,explain:"VERDADEIRO! A fotorreportagem aparece em jornais, revistas, sites de notícias e redes sociais — o suporte muda, mas o gênero mantém suas características."},
   {type:"multi",emoji:"📷",theme:"Fotorreportagem",text:"Qual publicação é conhecida por fotorreportagens de grande impacto visual sobre natureza e ciência?",options:["National Geographic","The Art Review Magazine","BBC News","Folha de S. Paulo"],correct:0,explain:"A National Geographic é mundialmente famosa por suas fotorreportagens de altíssima qualidade sobre natureza, ciência, culturas e exploração geográfica."},
   {type:"fill",emoji:"📷",theme:"Fotorreportagem",text:"O texto curto que acompanha e explica uma foto em uma fotorreportagem é chamado de _______.",answer:"legenda",accept:["legenda"],explain:"A legenda é o texto breve que acompanha a fotografia, contextualizando a imagem com informações essenciais."},
-  {type:"multi",emoji:"📷",theme:"Fotorreportagem",text:"O que diferencia o fotógrafo jornalístico (fotojornalista) de um fotógrafo artístico?",options:["O fotojornalista usa câmeras melhores","O fotojornalista tem compromisso com a verdade e o registro de fatos reais; o artístico busca expressão estética","O fotojornalista nunca edita suas fotos","Não há diferença entre os dois"],correct:1,explain:"O fotojornalista compromete-se com a REALIDADE — registra fatos verdadeiros para informar. O fotógrafo artístico busca expressão estética, podendo manipular livremente a imagem."},
+  {type:"multi",emoji:"📷",theme:"Fotorreportagem",text:"O que diferencia o fotógrafo jornalístico (fotojornalista) de um fotógrafo artístico?",options:["O fotojornalista usa câmeras melhores","O fotojornalista tem compromisso com a verdade e o registro de fatos reais; o artístico busca expressão estética","O fotojornalista nunca edita suas fotos","Não há diferença entre os dois"],correct:1,explain:"O fotojornalista compromete-se com a REALIDADE — registra fatos verdadeiros para informar. O fotógrafo artístico busca expressão estética, podendo manipular livremente a imagem."}],
+eng:[
+  {type:"multi",emoji:"📚",theme:"Places in a School",text:"Where do you go to borrow books and study in silence?",translation:"Onde você vai para pegar livros emprestados e estudar em silêncio?",options:["cafeteria","library","gym","lab"],correct:1,explain:"The LIBRARY is where you borrow books and study quietly. 📚"},
+  {type:"multi",emoji:"🍽️",theme:"Places in a School",text:"Where do students eat lunch at school?",translation:"Onde os estudantes almoçam na escola?",options:["library","classroom","cafeteria","gym"],correct:2,explain:"The CAFETERIA (cantina) is where students eat their meals at school! 🍽️"},
+  {type:"multi",emoji:"🔬",theme:"Places in a School",text:"'I conduct experiments at the _______.'\nWhat is the missing word?",translation:"'Eu faço experimentos no _______.' Qual é a palavra que falta?",options:["library","cafeteria","lab","gym"],correct:2,explain:"You conduct experiments in the LAB (laboratory)! 🔬"},
+  {type:"multi",emoji:"🏃",theme:"Places in a School",text:"'I do sports at the _______.'",translation:"'Eu pratico esportes na _______.'\n(court=quadra / gym=ginásio)",options:["library","court","cafeteria","lab"],correct:1,explain:"You do sports at the COURT (quadra) or GYM! ⚽"},
+  {type:"multi",emoji:"📋",theme:"Places in a School",text:"'I get documents at the _______.'",translation:"'Eu pego documentos na _______.' (secretaria/recepção)",options:["library","lab","reception","gym"],correct:2,explain:"You get documents at the RECEPTION (secretaria)! 📋"},
+  {type:"vf",emoji:"🏫",theme:"Places in a School",text:"TRUE or FALSE:\nThe principal's office is where the school director works.",translation:"VERDADEIRO ou FALSO:\nA diretoria é onde o diretor da escola trabalha.",correct:true,explain:"TRUE! The PRINCIPAL'S OFFICE is where the school principal (diretor) works. 🏫"},
+  {type:"multi",emoji:"📍",theme:"Prepositions",text:"The book is _______ the desk. (It's on top.)",translation:"O livro está _______ a mesa. (Está em cima.) on=sobre | under=embaixo | in=dentro",options:["in","under","on","next to"],correct:2,explain:"ON = sobre/em cima de. The book is ON the desk! 📖"},
+  {type:"multi",emoji:"📍",theme:"Prepositions",text:"The bag is _______ the chair. (It's below.)",translation:"A mochila está _______ a cadeira. (Está embaixo.)",options:["on","in","next to","under"],correct:3,explain:"UNDER = embaixo de. The bag is UNDER the chair! 🎒"},
+  {type:"multi",emoji:"📍",theme:"Prepositions",text:"The pencil is _______ the pencil case. (It's inside.)",translation:"O lápis está _______ o estojo. (Está dentro.)",options:["on","in","behind","under"],correct:1,explain:"IN = dentro de. The pencil is IN the pencil case! ✏️"},
+  {type:"vf",emoji:"📍",theme:"Prepositions",text:"TRUE or FALSE:\n'Next to' means ao lado de.",translation:"VERDADEIRO ou FALSO:\n'Next to' significa ao lado de.",correct:true,explain:"TRUE! NEXT TO = ao lado de. The desk is next to the window! 🪟"},
+  {type:"multi",emoji:"🏫",theme:"There is / There are",text:"Complete: '_______ a clock in my classroom.'",translation:"Complete: '_______ um relógio na minha sala de aula.'\n(singular = There IS)",options:["There is","There isn't","There are","There aren't"],correct:0,explain:"THERE IS = há (singular). A clock is singular, so we use THERE IS! 🕐"},
+  {type:"multi",emoji:"🪟",theme:"There is / There are",text:"Complete: '_______ windows in my classroom.'",translation:"Complete: '_______ janelas na minha sala de aula.'\n(plural = There ARE)",options:["There is","There isn't","There are","There aren't"],correct:2,explain:"THERE ARE = há (plural). Windows is plural, so we use THERE ARE! 🪟"},
+  {type:"vf",emoji:"❓",theme:"There is / There are",text:"TRUE or FALSE:\nWe use 'There are' with singular nouns.",translation:"VERDADEIRO ou FALSO:\nUsamos 'There are' com substantivos no singular.",correct:false,explain:"FALSE! THERE IS = singular | THERE ARE = plural. Don't mix them up! 📏"},
+  {type:"multi",emoji:"❌",theme:"There is / There are",text:"'_______ a swimming pool in my school.' (No pool exists.)",translation:"'_______ uma piscina na minha escola.' (Não há piscina.)",options:["There is","There are","There isn't","There aren't"],correct:2,explain:"THERE ISN'T = não há (singular negative). No pool = THERE ISN'T a swimming pool! 🏊"},
+  {type:"multi",emoji:"📖",theme:"Objects in a Classroom",text:"The correct name for the black board where teachers write with chalk is:",translation:"O nome correto para o quadro preto onde os professores escrevem com giz é:",options:["Whiteboard","Desk","Chalkboard","TV Set"],correct:2,explain:"CHALKBOARD (quadro negro) = black board + chalk (giz). WHITEBOARD uses markers! ✏️"},
+  {type:"multi",emoji:"🪑",theme:"Objects in a Classroom",text:"Where do students sit in the classroom?",translation:"Onde os estudantes se sentam na sala de aula?",options:["whiteboard","desk","window","chalkboard"],correct:1,explain:"Students sit at a DESK (carteira)! 🪑"},
+  {type:"vf",emoji:"📺",theme:"Objects in a Classroom",text:"TRUE or FALSE:\nA whiteboard and a chalkboard are exactly the same thing.",translation:"VERDADEIRO ou FALSO:\nQuadro branco e quadro negro são exatamente a mesma coisa.",correct:false,explain:"FALSE! WHITEBOARD = uses markers (caneta). CHALKBOARD = uses chalk (giz). Different! 🖊️"},
+  {type:"multi",emoji:"📖",theme:"Possession",text:"'This is _______ English book.' (The book belongs to Maria.)",translation:"'Este é o livro de inglês _______.' (O livro pertence à Maria.)\nGenitive case: nome + 's",options:["Maria'","Maria is","Maria's","Maria"],correct:2,explain:"MARIA'S = de Maria. Add apostrophe + s ('s) to show possession in English! 📖"},
+  {type:"multi",emoji:"👥",theme:"Possession",text:"'My classmates and I have a large classroom. _______ classroom is bright.'",translation:"'Meus colegas e eu temos uma sala grande. _______ sala é clara.'\n(my classmates + I = we → OUR)",options:["Your","Its","Their","Our"],correct:3,explain:"OUR = nosso/nossa (belonging to 'we'). My classmates AND I = we, so OUR classroom! 👥"},
+  {type:"multi",emoji:"🎒",theme:"Possession",text:"Which sentence uses the genitive case ('s) correctly?",translation:"Qual frase usa o caso genitivo ('s) corretamente?",options:["The bag of John","John bag","Johns bag","John's bag"],correct:3,explain:"JOHN'S BAG = a mochila do John. Owner + 's + object = genitive case! 🎒"},
+  {type:"vf",emoji:"📝",theme:"Possession",text:"TRUE or FALSE:\n'Her book' means the book belongs to a girl or woman.",translation:"VERDADEIRO ou FALSO:\n'Her book' significa que o livro pertence a uma garota ou mulher.",correct:true,explain:"TRUE! HER = dela. Her (she/her) → her book = o livro dela! 📝"},
+  {type:"multi",emoji:"👨‍👩‍👧",theme:"Possession",text:"'Tom and Ana have a dog. _______ dog is very friendly.'",translation:"'Tom e Ana têm um cachorro. _______ cachorro é muito amigável.'\n(Tom + Ana = they → THEIR)",options:["My","His","Her","Their"],correct:3,explain:"THEIR = deles/delas (belonging to they). Tom AND Ana = they → THEIR dog! 🐕"}
+],
+sci:[
+  {type:"multi",emoji:"🧊",theme:"Transformação da Matéria",text:"Cubos de gelo colocados em um copo de refrigerante derreteram completamente. Essa mudança é classificada como:",options:["Transformação química, pois surgiu água líquida","Transformação física, pois não houve formação de nova substância","Combustão, pois ocorreu mudança de temperatura","Oxidação, pois o gelo entrou em contato com o ar"],correct:1,explain:"Gelo → água líquida é TRANSFORMAÇÃO FÍSICA. A substância (H₂O) continua a mesma — só mudou o estado físico. Nenhuma substância nova foi formada!"},
+  {type:"multi",emoji:"🔥",theme:"Transformação da Matéria",text:"Ao acender uma fogueira, a madeira produz fumaça, cinzas e libera calor. Esse processo é:",options:["Uma transformação física","Uma simples mudança de tamanho","Uma transformação química","Um processo de evaporação"],correct:2,explain:"Queimar madeira é TRANSFORMAÇÃO QUÍMICA! Surgem novas substâncias (fumaça, cinzas, gás carbônico) completamente diferentes da madeira original!"},
+  {type:"multi",emoji:"🍫",theme:"Transformação da Matéria",text:"Quais situações representam APENAS transformações físicas?\nI. Derretimento do chocolate.\nII. Congelamento da água.\nIII. Queima de papel.\nIV. Formação de ferrugem.",options:["I e II","I e III","II e IV","III e IV"],correct:0,explain:"I e II são transformações FÍSICAS (a substância não muda). III e IV são QUÍMICAS (surgem novas substâncias)!"},
+  {type:"multi",emoji:"🚲",theme:"Transformação da Matéria",text:"Uma bicicleta deixada na chuva começou a apresentar ferrugem. Isso indica:",options:["Mudança apenas na forma do metal","Transformação física causada pela água","Transformação química com formação de novas substâncias","Processo de derretimento do ferro"],correct:2,explain:"Ferrugem = TRANSFORMAÇÃO QUÍMICA! O ferro reage com oxigênio e água formando óxido de ferro — substância completamente nova e diferente!"},
+  {type:"multi",emoji:"💧",theme:"Transformação da Matéria",text:"A água fervendo passa do estado líquido para o gasoso. Nesse caso ocorre:",options:["Formação de uma nova substância gasosa","Transformação química irreversível","Apenas uma transformação física","Processo de combustão da água"],correct:2,explain:"Água líquida → vapor é TRANSFORMAÇÃO FÍSICA (evaporação). A substância continua sendo H₂O — só mudou o estado físico!"},
+  {type:"multi",emoji:"🍳",theme:"Transformação da Matéria",text:"Durante o cozimento, foi observada fumaça e mudança de cor. Essas são evidências de:",options:["Transformação física","Formação de mistura homogênea","Transformação química","Mudança de estado físico"],correct:2,explain:"Fumaça e mudança de cor são evidências de TRANSFORMAÇÃO QUÍMICA! Novas substâncias foram formadas."},
+  {type:"multi",emoji:"✂️",theme:"Transformação da Matéria",text:"Um estudante recortou figuras de papel. O material continuou sendo papel. Isso mostra que ocorreu:",options:["Transformação química","Transformação física","Combustão parcial","Reação química com o ar"],correct:1,explain:"Cortar papel é TRANSFORMAÇÃO FÍSICA! A composição do papel não mudou — só ficou menor. Nenhuma substância nova surgiu."},
+  {type:"multi",emoji:"🧴",theme:"Transformação da Matéria",text:"Ao misturar dois produtos de limpeza, formaram-se bolhas e liberação de gás. Isso pode indicar:",options:["Apenas mudança de temperatura","Transformação física da matéria","Formação de novas substâncias — transformação química","Mudança de estado físico do líquido"],correct:2,explain:"Bolhas e liberação de gás são sinais de TRANSFORMAÇÃO QUÍMICA! Novas substâncias (gás) foram produzidas na reação!"},
+  {type:"multi",emoji:"🥚",theme:"Transformação da Matéria",text:"Um ovo cozinhado em água quente não pode voltar ao estado inicial. Esse processo representa:",options:["Transformação física reversível","Mudança apenas de temperatura","Transformação química","Simples mistura de substâncias"],correct:2,explain:"Cozinhar ovo é TRANSFORMAÇÃO QUÍMICA IRREVERSÍVEL! As proteínas se transformam permanentemente — impossível 'descozinhar'!"},
+  {type:"multi",emoji:"🔍",theme:"Transformação da Matéria",text:"Em transformações químicas, qual sinal indica a formação de novas substâncias?",options:["Alteração apenas do formato do material","Formação de gás, fumaça ou mudança de cor","Divisão do material em partes menores","Mudança de posição do objeto"],correct:1,explain:"Formação de gás, fumaça ou mudança de cor são os principais SINAIS DE TRANSFORMAÇÃO QUÍMICA! Indicam que novas substâncias foram produzidas."},
+  {type:"vf",emoji:"🧊",theme:"Transformação da Matéria",text:"VERDADEIRO ou FALSO:\nDerreter gelo é uma transformação física, pois a substância (água) não muda.",correct:true,explain:"VERDADEIRO! Gelo → água líquida = TRANSFORMAÇÃO FÍSICA. H₂O continua sendo H₂O — só mudou o estado físico!"},
+  {type:"vf",emoji:"🔥",theme:"Transformação da Matéria",text:"VERDADEIRO ou FALSO:\nQueimar papel é uma transformação física porque o papel fica menor.",correct:false,explain:"FALSO! Queimar papel é TRANSFORMAÇÃO QUÍMICA. Surgem cinzas, fumaça e gás carbônico — substâncias completamente diferentes do papel!"},
+  {type:"multi",emoji:"🌡️",theme:"Transformação da Matéria",text:"Qual das opções abaixo é um exemplo de transformação FÍSICA?",options:["Queima de madeira","Fermentação do pão","Derretimento do ferro","Enferrujamento de um prego"],correct:2,explain:"Derreter ferro é TRANSFORMAÇÃO FÍSICA — continua sendo ferro (só mudou de sólido para líquido). Os outros exemplos formam novas substâncias (química)!"},
+  {type:"multi",emoji:"🍞",theme:"Transformação da Matéria",text:"A fermentação do pão, onde a massa cresce e ganha novas características, é um exemplo de:",options:["Transformação física reversível","Transformação química","Mudança de estado físico","Dissolução simples"],correct:1,explain:"Fermentação é TRANSFORMAÇÃO QUÍMICA! Microrganismos transformam açúcares em gás carbônico e álcool — surgem novas substâncias!"},
+  {type:"multi",emoji:"🔑",theme:"Transformação da Matéria",text:"Qual é a principal diferença entre transformação física e química?",options:["Na física há mudança de cor; na química não","Na física não surgem novas substâncias; na química surgem","Na física usa-se fogo; na química não","Na física o material some; na química permanece"],correct:1,explain:"A diferença fundamental: FÍSICA = a substância permanece a mesma (só muda forma/estado). QUÍMICA = surgem novas substâncias com propriedades diferentes!"}
 ]
 };
 
-const TOTAL=15;
+const TOTAL={hist:15,lit:15,eng:15,sci:15};
 let curSubj=null,qs=[],idx=0,score=0,corr=0,wrng=0;
 let wq=[],wqs=[],answered=false,retry=false,total=15;
 let tstat={};
@@ -306,13 +366,14 @@ function selSubj(s){
   const btn=document.getElementById('btn-play');
   btn.classList.add('rdy');
   btn.textContent='Estudar '+SUBJ[s].name+'! 🚀';
-  btn.style.color=s==='hist'?'#0F766E':'#5B21B6';
+  btn.style.color=s==='hist'?'#0F766E':s==='lit'?'#5B21B6':s==='eng'?'#1D4ED8':'#065F46';
 }
 
 function startGame(){
   if(!curSubj)return;
   const pool=QS[curSubj];
   // ensure at least 7 from each theme when possible
+  const t=TOTAL[curSubj]||15;
   const byTheme={};
   pool.forEach(q=>{if(!byTheme[q.theme])byTheme[q.theme]=[];byTheme[q.theme].push(q);});
   let picked=[];
@@ -320,7 +381,7 @@ function startGame(){
   picked=shuf(picked).slice(0,TOTAL);
   qs=picked;
 
-  idx=0;score=0;corr=0;wrng=0;wq=[];wqs=[];answered=false;retry=false;total=TOTAL;
+  idx=0;score=0;corr=0;wrng=0;wq=[];wqs=[];answered=false;retry=false;total=t;
   tstat={};
   qs.forEach(q=>{if(!tstat[q.theme])tstat[q.theme]={t:0,c:0};tstat[q.theme].t++;});
 
@@ -388,6 +449,17 @@ function renderQ(){
     setTimeout(()=>inp.focus(),100);
   }
   document.getElementById('sdisp').textContent=score;
+  if(curSubj==='eng'&&q.translation){
+    const tb=document.createElement('button');
+    tb.type='button';tb.className='trans-btn';
+    tb.textContent='🇧🇷 Ver tradução em Português';
+    const box=document.createElement('div');
+    box.className='trans-box';box.textContent=q.translation;
+    const tog=()=>{box.classList.toggle('show');tb.textContent=box.classList.contains('show')?'🇬🇧 Hide translation':'🇧🇷 Ver tradução em Português';};
+    tb.onclick=tog;tb.ontouchend=(e)=>{e.preventDefault();tog();};
+    const qa=document.getElementById('ansarea');
+    qa.parentNode.insertBefore(box,qa);qa.parentNode.insertBefore(tb,box);
+  }
 }
 
 function hMulti(chosen,q){

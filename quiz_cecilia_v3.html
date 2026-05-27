@@ -30,6 +30,22 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .sel-icon{font-size:72px;display:block;animation:float 3s ease-in-out infinite;margin-bottom:.75rem;}
 
 button{font-family:inherit;}
+.trans-btn{display:inline-flex;align-items:center;gap:5px;background:#EFF6FF;border:1.5px solid #93C5FD;border-radius:var(--radius-sm);padding:6px 14px;font-size:12px;font-weight:800;color:#1D4ED8;cursor:pointer;margin-bottom:8px;transition:background .15s;font-family:'Nunito',sans-serif;}
+.trans-btn:active{background:#DBEAFE;}
+.trans-box{background:#DBEAFE;border:1px solid #93C5FD;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:#1E3A8A;font-weight:700;margin-bottom:10px;display:none;line-height:1.5;white-space:pre-line;}
+.trans-box.show{display:block;}
+
+.timeline-wrap{margin:0 0 14px 0;overflow-x:auto;padding-bottom:4px;}
+.timeline{display:flex;align-items:flex-start;gap:0;min-width:320px;position:relative;padding:10px 0 0;}
+.timeline::before{content:'';position:absolute;top:22px;left:28px;right:28px;height:3px;background:linear-gradient(90deg,#1D4ED8,#0EA5E9,#38BDF8,#7DD3FC);border-radius:99px;z-index:0;}
+.tl-item{display:flex;flex-direction:column;align-items:center;flex:1;position:relative;z-index:1;}
+.tl-dot{width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 2px #1D4ED8;display:flex;align-items:center;justify-content:center;font-size:12px;margin-bottom:8px;background:white;}
+.tl-item:nth-child(1) .tl-dot{box-shadow:0 0 0 2px #1D4ED8;background:#EFF6FF;}
+.tl-item:nth-child(2) .tl-dot{box-shadow:0 0 0 2px #0EA5E9;background:#E0F2FE;}
+.tl-item:nth-child(3) .tl-dot{box-shadow:0 0 0 2px #38BDF8;background:#BAE6FD;}
+.tl-item:nth-child(4) .tl-dot{box-shadow:0 0 0 2px #7DD3FC;background:#E0F2FE;}
+.tl-label{font-size:10px;font-weight:800;color:#1D4ED8;text-align:center;line-height:1.3;max-width:70px;}
+.tl-sub{font-size:9px;color:#64748B;font-weight:600;text-align:center;margin-top:2px;}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .sel-title{font-family:'Baloo 2',sans-serif;font-size:28px;font-weight:800;color:white;margin-bottom:.4rem;}
 .sel-sub{font-size:15px;color:rgba(255,255,255,0.88);margin-bottom:1.75rem;line-height:1.5;}
@@ -148,6 +164,10 @@ button{font-family:inherit;}
         <span class="sc-ico">📖</span>
         <div><div class="sc-name">Português</div><div class="sc-desc">Tirinhas, balões, antônimos, ortografia G/J</div></div>
       </button>
+      <button type="button" class="subj-card" onclick="selSubj('eng')" ontouchend="event.preventDefault();selSubj('eng')" id="card-eng">
+        <span class="sc-ico">🇬🇧</span>
+        <div><div class="sc-name">English</div><div class="sc-desc">Time, Weather, Life Stages &amp; Materials</div></div>
+      </button>
     </div>
     <button class="btn-play" id="btn-play" onclick="startGame()" ontouchend="event.preventDefault();startGame()">Vamos jogar! 🚀</button>
   </div>
@@ -212,7 +232,8 @@ const T2="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUA
 const SUBJ={
   geo:{name:"Geografia",ico:"🌍",grad:"linear-gradient(160deg,#1BA870,#4A90D9)",pill:{bg:"#E8FBF3",bo:"#5DCAA5",co:"#085041"},hc:[27,168,112]},
   hist:{name:"História",ico:"🏘️",grad:"linear-gradient(160deg,#F97316,#FBBF24)",pill:{bg:"#FFF7ED",bo:"#FCD34D",co:"#7C2D12"},hc:[249,115,22]},
-  port:{name:"Português",ico:"📖",grad:"linear-gradient(160deg,#5B21B6,#EC4899)",pill:{bg:"#EDE9FE",bo:"#C4B5FD",co:"#5B21B6"},hc:[92,33,182]}
+  port:{name:"Português",ico:"📖",grad:"linear-gradient(160deg,#5B21B6,#EC4899)",pill:{bg:"#EDE9FE",bo:"#C4B5FD",co:"#5B21B6"},hc:[92,33,182]},
+  eng:{name:"English",ico:"🇬🇧",grad:"linear-gradient(160deg,#1D4ED8,#0EA5E9)",pill:{bg:"#EFF6FF",bo:"#93C5FD",co:"#1D4ED8"},hc:[29,78,216]}
 };
 
 const TIPS={
@@ -326,11 +347,51 @@ port:[
   {type:"fill",emoji:"✏️",theme:"Ortografia G e J",text:"Complete: O _irafa tem pescoço longo.\nA letra é _.",answer:"G",accept:["G","g"],explain:"GIRAFA se escreve com G! Dica: -GI geralmente usa G."},
   {type:"multi",emoji:"📝",theme:"Construção de Frases",text:"Qual frase está escrita CORRETAMENTE?",options:["ontem fui passear com maria.","Ontem fui passear com Maria.","ontem Fui passear com Maria.","Ontem fui Passear com maria."],correct:1,explain:"Começa com maiúscula (Ontem) e nomes próprios têm maiúscula (Maria)."},
   {type:"multi",emoji:"📝",theme:"Construção de Frases",text:"Organize as palavras:\n[ gosta / Magali / de / muito / comer ]",options:["de Magali gosta muito comer","Magali gosta muito de comer.","muito Magali de gosta comer","comer Magali gosta de muito"],correct:1,explain:"Sujeito (Magali) + verbo (gosta) + complemento (muito de comer)."},
-  {type:"vf",emoji:"📝",theme:"Construção de Frases",text:"VERDADEIRO ou FALSO:\nToda frase deve começar com letra maiúscula e terminar com pontuação.",correct:true,explain:"VERDADEIRO! Começa com MAIÚSCULA e termina com ponto, ! ou ?"},
+  {type:"vf",emoji:"📝",theme:"Construção de Frases",text:"VERDADEIRO ou FALSO:\nToda frase deve começar com letra maiúscula e terminar com pontuação.",correct:true,explain:"VERDADEIRO! Começa com MAIÚSCULA e termina com ponto, ! ou ?"}],
+eng:[
+  {type:"multi",emoji:"⏰",theme:"Time Expressions",text:"When do you usually eat breakfast?",translation:"Quando você geralmente toma café da manhã?",options:["at the weekend","before school","after school","at night"],correct:1,explain:"We eat breakfast BEFORE SCHOOL — in the morning, before classes start! 🌅"},
+  {type:"vf",emoji:"📅",theme:"Time Expressions",text:"TRUE or FALSE:\n'At the weekend' means on Saturday and Sunday.",translation:"VERDADEIRO ou FALSO:\n'At the weekend' significa no sábado e no domingo.",correct:true,explain:"TRUE! 'At the weekend' = on Saturday and Sunday. We rest and play at the weekend! 🎉"},
+  {type:"multi",emoji:"🎮",theme:"Time Expressions",text:"I play video games _______. (Saturday and Sunday)",translation:"Eu jogo videogame _______. (Sábado e domingo)",options:["before school","after school","at the weekend","during school"],correct:2,explain:"We use 'AT THE WEEKEND' for Saturday and Sunday activities! 🎮"},
+  {type:"vf",emoji:"📚",theme:"Time Expressions",text:"TRUE or FALSE:\n'After school' means before classes start.",translation:"VERDADEIRO ou FALSO:\n'After school' significa antes das aulas começarem.",correct:false,explain:"FALSE! 'After school' means AFTER classes finish. Before classes = 'before school'. ⬅️"},
+  {type:"multi",emoji:"🌅",theme:"Time Expressions",text:"Tom plays football _______. He plays when classes are over.",translation:"Tom joga futebol _______. Ele joga quando as aulas terminam.",options:["before school","at the weekend","after school","at noon"],correct:2,explain:"'AFTER SCHOOL' = when classes are finished. Tom plays AFTER school! ⚽"},
+  {type:"multi",emoji:"🏖️",theme:"Time Expressions",text:"My family watches movies on Saturdays and Sundays. We watch _______.",translation:"Minha família assiste filmes nos sábados e domingos. Assistimos _______.",options:["before school","after school","at school","at the weekend"],correct:3,explain:"Saturday and Sunday = AT THE WEEKEND! 🏖️"},
+  {type:"vf",emoji:"🌤️",theme:"Time Expressions",text:"TRUE or FALSE:\nWe go to the beach 'at the weekend' because we don't have school.",translation:"VERDADEIRO ou FALSO:\nVamos à praia 'at the weekend' porque não temos escola.",correct:true,explain:"TRUE! We go to the beach at the weekend (Saturday/Sunday) — no school! 🏖️"},
+  {type:"multi",emoji:"⏰",theme:"Time Expressions",text:"Which sentence is correct?",translation:"Qual frase está correta?",options:["I sleep before school in the afternoon","I eat dinner before school in the morning","I do my homework after school","I wake up at the weekend every morning"],correct:2,explain:"'I do my homework AFTER SCHOOL' is correct — we do homework after classes! ✏️"},
+  {type:"multi",emoji:"🍳",theme:"Time Expressions",text:"She has a shower and eats breakfast _______. Then she goes to school.",translation:"Ela toma banho e toma café da manhã _______. Depois vai para a escola.",options:["after school","at the weekend","before school","at night"],correct:2,explain:"She does these things BEFORE SCHOOL — in the morning, before going to class! 🍳"},
+  {type:"vf",emoji:"🎉",theme:"Time Expressions",text:"TRUE or FALSE:\nWe have school 'at the weekend'.",translation:"VERDADEIRO ou FALSO:\nTemos escola 'at the weekend'.",correct:false,explain:"FALSE! We DON'T have school at the weekend. Saturday and Sunday are free days! 🎉"},
+  {type:"multi",emoji:"☀️",theme:"Weather",text:"Look at the sun! It is a _______ day.",translation:"Olhe para o sol! É um dia _______. (ensolarado)",options:["rainy","snowy","sunny","windy"],correct:2,explain:"When the sun shines, we say it is SUNNY! ☀️"},
+  {type:"multi",emoji:"🌧️",theme:"Weather",text:"I need my umbrella today. The weather is _______.",translation:"Preciso do meu guarda-chuva hoje. O tempo está _______. (chuvoso)",options:["sunny","hot","rainy","windy"],correct:2,explain:"We use an umbrella when it is RAINY! 🌧️"},
+  {type:"vf",emoji:"❄️",theme:"Weather",text:"TRUE or FALSE:\nWhen it is snowy, we can make a snowman.",translation:"VERDADEIRO ou FALSO:\nQuando está nevando, podemos fazer um boneco de neve.",correct:true,explain:"TRUE! When it is SNOWY, we can play in the snow and make a snowman! ⛄"},
+  {type:"multi",emoji:"🌬️",theme:"Weather",text:"The trees are moving a lot. It is very _______ today.",translation:"As árvores estão se movendo muito. Está muito _______ hoje. (ventoso)",options:["hot","cold","snowy","windy"],correct:3,explain:"When wind blows and trees move, it is WINDY! 🌬️"},
+  {type:"multi",emoji:"🧣",theme:"Weather",text:"I wear a coat and scarf. The weather is _______.",translation:"Eu uso casaco e cachecol. O tempo está _______. (frio)",options:["hot","sunny","cold","rainy"],correct:2,explain:"We wear coats and scarves when it is COLD! 🧣"},
+  {type:"vf",emoji:"🌡️",theme:"Weather",text:"TRUE or FALSE:\nWhen it is hot, we wear a heavy winter coat.",translation:"VERDADEIRO ou FALSO:\nQuando está quente, usamos um casaco pesado de inverno.",correct:false,explain:"FALSE! When it is HOT, we wear light clothes. Coats are for COLD weather! ☀️"},
+  {type:"multi",emoji:"🏊",theme:"Weather",text:"It is very _______! Let's go swimming!",translation:"Está muito _______! Vamos nadar! (quente)",options:["cold","snowy","windy","hot"],correct:3,explain:"When it is HOT, we love to swim and cool down! 🏊"},
+  {type:"vf",emoji:"🌨️",theme:"Weather",text:"TRUE or FALSE:\n'Snowy' and 'rainy' describe the same weather.",translation:"VERDADEIRO ou FALSO:\n'Snowy' (nevoso) e 'rainy' (chuvoso) descrevem o mesmo tempo.",correct:false,explain:"FALSE! SNOWY = snow falls ❄️. RAINY = rain falls 🌧️. They are different!"},
+  {type:"multi",emoji:"👶",theme:"Human Life Stages",text:"A very young child who cannot walk or talk yet is called a _______.",translation:"Uma criança muito pequena que ainda não consegue andar ou falar é chamada de _______ (bebê).",options:["teenager","baby","adult","elderly"],correct:1,explain:"A BABY is a very young child. Babies need lots of care! 👶"},
+  {type:"multi",emoji:"🧒",theme:"Human Life Stages",text:"You are 7 years old and go to school. You are a _______.",translation:"Você tem 7 anos e vai à escola. Você é uma _______ (criança).",options:["baby","teenager","child","adult"],correct:2,explain:"From about 2 to 12 years old, we are CHILDREN! 🧒"},
+  {type:"vf",emoji:"👦",theme:"Human Life Stages",text:"TRUE or FALSE:\nA teenager is between 13 and 19 years old.",translation:"VERDADEIRO ou FALSO:\nUm adolescente tem entre 13 e 19 anos.",correct:true,explain:"TRUE! A TEENAGER is between 13 and 19 years old! 🧑"},
+  {type:"multi",emoji:"👨",theme:"Human Life Stages",text:"What is the correct order of human life stages?",translation:"Qual é a ordem correta das etapas da vida humana?",options:["Adult → Baby → Child → Teenager","Baby → Child → Teenager → Adult → Elderly","Teenager → Baby → Adult → Child","Child → Baby → Adult → Elderly"],correct:1,explain:"The correct order: BABY → CHILD → TEENAGER → ADULT → ELDERLY! 👶🧒👦👨👴"},
+  {type:"multi",emoji:"👴",theme:"Human Life Stages",text:"My grandfather is 75 years old. He is _______.",translation:"Meu avô tem 75 anos. Ele é _______ (idoso).",options:["a baby","a child","a teenager","elderly"],correct:3,explain:"People over 65 years old are ELDERLY. Your grandfather is elderly! 👴"},
+  {type:"vf",emoji:"👩",theme:"Human Life Stages",text:"TRUE or FALSE:\nAdults can work and live independently.",translation:"VERDADEIRO ou FALSO:\nAdultos podem trabalhar e viver de forma independente.",correct:true,explain:"TRUE! ADULTS (18+ years old) work, vote and take care of their families! 👩"},
+  {type:"multi",emoji:"🎂",theme:"Human Life Stages",text:"Which life stage comes AFTER teenager?",translation:"Qual etapa da vida vem DEPOIS do adolescente?",options:["baby","child","adult","elderly"],correct:2,explain:"After teenager comes ADULT! Teenager → ADULT → Elderly. 👨"},
+  {type:"multi",emoji:"🪵",theme:"Objects and Materials",text:"A wooden chair is made of _______.",translation:"Uma cadeira de madeira é feita de _______ (madeira).",options:["metal","plastic","wood","glass"],correct:2,explain:"WOOD comes from trees! Chairs, tables and doors are often made of wood. 🪵"},
+  {type:"multi",emoji:"🪟",theme:"Objects and Materials",text:"Windows in houses are made of _______.",translation:"As janelas das casas são feitas de _______ (vidro).",options:["wood","metal","plastic","glass"],correct:3,explain:"Windows are made of GLASS — a transparent material we can see through! 🪟"},
+  {type:"vf",emoji:"🥤",theme:"Objects and Materials",text:"TRUE or FALSE:\nPlastic bottles are made of metal.",translation:"VERDADEIRO ou FALSO:\nGarrafas plásticas são feitas de metal.",correct:false,explain:"FALSE! Plastic bottles are made of PLASTIC — light and flexible. Metal is harder! ♻️"},
+  {type:"multi",emoji:"🔩",theme:"Objects and Materials",text:"Spoons, forks and knives are usually made of _______.",translation:"Colheres, garfos e facas são geralmente feitos de _______ (metal).",options:["wood","plastic","glass","metal"],correct:3,explain:"Cutlery is usually made of METAL — strong and easy to clean! 🔩"},
+  {type:"vf",emoji:"🧱",theme:"Objects and Materials",text:"TRUE or FALSE:\nBricks used to build houses are made of clay.",translation:"VERDADEIRO ou FALSO:\nTijolos usados para construir casas são feitos de argila.",correct:true,explain:"TRUE! Bricks are made of CLAY baked until hard — a natural material! 🧱"},
+  {type:"multi",emoji:"👕",theme:"Objects and Materials",text:"Most t-shirts and clothes are made of _______.",translation:"A maioria das camisetas e roupas são feitas de _______ (algodão/tecido).",options:["glass","metal","cotton or fabric","rubber"],correct:2,explain:"Clothes are made of COTTON or FABRIC — soft and comfortable! 👕"},
+  {type:"multi",emoji:"🪑",theme:"Objects and Materials",text:"Which material comes from trees?",translation:"Qual material vem das árvores?",options:["glass","metal","plastic","wood"],correct:3,explain:"WOOD comes from trees! We use it for furniture, houses and paper. 🌲"},
+  {type:"vf",emoji:"💡",theme:"Objects and Materials",text:"TRUE or FALSE:\nGlass is transparent — we can see through it.",translation:"VERDADEIRO ou FALSO:\nO vidro é transparente — podemos ver através dele.",correct:true,explain:"TRUE! GLASS is transparent. That's why we use it for windows! 🪟"},
+  {type:"multi",emoji:"🧒",theme:"Human Life Stages",text:"Which stage of life is called 'Childhood'?",translation:"Qual etapa da vida é chamada de 'Childhood' (infância)?",options:["From 13 to 19 years old","From birth to about 12 years old","From 20 to 64 years old","From 65 years old onwards"],correct:1,explain:"CHILDHOOD = from birth to about 12 years old. This is the stage of babies and children! 👶🧒"},
+  {type:"multi",emoji:"🧑",theme:"Human Life Stages",text:"'Adolescence' is another word for which life stage?",translation:"'Adolescence' (adolescência) é outra palavra para qual etapa da vida?",options:["Childhood","Teenager years (13–19)","Adulthood","Old age"],correct:1,explain:"ADOLESCENCE = the teenage years, from 13 to 19 years old. You grow a lot during adolescence! 🧑"},
+  {type:"multi",emoji:"👨",theme:"Human Life Stages",text:"A person in 'Adulthood' is usually:",translation:"Uma pessoa na 'Adulthood' (fase adulta) geralmente:",options:["Under 12 years old","Between 13 and 19 years old","Between 20 and 64 years old","Over 65 years old"],correct:2,explain:"ADULTHOOD = from about 20 to 64 years old. Adults work, have families and are independent! 👨"},
+  {type:"multi",emoji:"👴",theme:"Human Life Stages",text:"'Old age' starts at approximately:",translation:"A 'Old age' (velhice) começa aproximadamente:",options:["20 years old","13 years old","40 years old","65 years old"],correct:3,explain:"OLD AGE starts at around 65 years old. People in old age are called elderly or senior! 👴"},
+  {type:"vf",emoji:"📊",theme:"Human Life Stages",text:"TRUE or FALSE:\nThe correct order is: Childhood → Adolescence → Adulthood → Old Age.",translation:"VERDADEIRO ou FALSO:\nA ordem correta é: Infância → Adolescência → Fase adulta → Velhice.",correct:true,explain:"TRUE! Childhood → Adolescence → Adulthood → Old Age is the correct order of human life stages! 🎯"},
+  {type:"multi",emoji:"🎓",theme:"Human Life Stages",text:"During which stage do people usually go to university and start working?",translation:"Durante qual etapa as pessoas geralmente vão para a universidade e começam a trabalhar?",options:["Childhood","Adolescence","Adulthood","Old age"],correct:2,explain:"People start university and work in early ADULTHOOD — around 18 to 25 years old! 🎓"}
 ]
 };
 
-const TOTAL={geo:10,hist:15,port:15};
+const TOTAL={geo:10,hist:15,port:15,eng:10};
 let curSubj=null,qs=[],idx=0,score=0,corr=0,wrng=0;
 let wq=[],wqs=[],answered=false,retry=false,total=0;
 let tstat={};
@@ -345,7 +406,7 @@ function selSubj(s){
   const btn=document.getElementById('btn-play');
   btn.classList.add('rdy');
   btn.textContent='Estudar '+SUBJ[s].name+'! 🚀';
-  btn.style.color=s==='geo'?'#1BA870':s==='hist'?'#F97316':'#7C3AED';
+  btn.style.color=s==='geo'?'#1BA870':s==='hist'?'#F97316':s==='port'?'#7C3AED':'#1D4ED8';
 }
 
 function startGame(){
@@ -428,6 +489,36 @@ function renderQ(){
     setTimeout(()=>inp.focus(),100);
   }
   document.getElementById('sdisp').textContent=score;
+  // Life Stages timeline for Human Life Stages questions
+  if(curSubj==='eng'&&q.theme==='Human Life Stages'){
+    const tlWrap=document.createElement('div');
+    tlWrap.className='timeline-wrap';
+    tlWrap.innerHTML=`<div class="timeline">
+      <div class="tl-item"><div class="tl-dot">👶</div><div class="tl-label">Childhood</div><div class="tl-sub">0–12 yrs</div></div>
+      <div class="tl-item"><div class="tl-dot">🧑</div><div class="tl-label">Adolescence</div><div class="tl-sub">13–19 yrs</div></div>
+      <div class="tl-item"><div class="tl-dot">👨</div><div class="tl-label">Adulthood</div><div class="tl-sub">20–64 yrs</div></div>
+      <div class="tl-item"><div class="tl-dot">👴</div><div class="tl-label">Old Age</div><div class="tl-sub">65+ yrs</div></div>
+    </div>`;
+    const qtxtEl=document.getElementById('qtxt');
+    qtxtEl.parentNode.insertBefore(tlWrap,qtxtEl.nextSibling);
+  }
+  // Translation button for English quiz
+  if(curSubj==='eng'&&q.translation){
+    const tb=document.createElement('button');
+    tb.type='button';tb.className='trans-btn';
+    tb.textContent='🇧🇷 Ver tradução em Português';
+    const box=document.createElement('div');
+    box.className='trans-box';
+    box.textContent=q.translation;
+    const tog=()=>{
+      box.classList.toggle('show');
+      tb.textContent=box.classList.contains('show')?'🇬🇧 Hide translation':'🇧🇷 Ver tradução em Português';
+    };
+    tb.onclick=tog;tb.ontouchend=(e)=>{e.preventDefault();tog();};
+    const qa=document.getElementById('ansarea');
+    qa.parentNode.insertBefore(box,qa);
+    qa.parentNode.insertBefore(tb,box);
+  }
 }
 
 function hMulti(chosen,q){
