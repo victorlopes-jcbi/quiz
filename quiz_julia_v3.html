@@ -172,6 +172,10 @@ button{font-family:inherit;}
         <span class="sc-ico">🔬</span>
         <div><div class="sc-name">Ciências</div><div class="sc-desc">Transformações físicas e químicas da matéria</div></div>
       </button>
+      <button type="button" class="subj-card" onclick="selSubj('geo')" ontouchend="event.preventDefault();selSubj('geo')" id="card-geo">
+        <span class="sc-ico">🌊</span>
+        <div><div class="sc-name">Geografia</div><div class="sc-desc">Ciclo da água, corpos de água e bacias hidrográficas</div></div>
+      </button>
     </div>
     <button class="btn-play" id="btn-play" onclick="startGame()" ontouchend="event.preventDefault();startGame()">Iniciar Quiz! 🚀</button>
   </div>
@@ -233,7 +237,8 @@ const SUBJ={
   hist:{name:"História",ico:"🏛️",grad:"linear-gradient(135deg,#0D9488,#5B21B6)",pill:{bg:"#CCFBF1",bo:"#5EEAD4",co:"#0F766E"},hc:[13,148,136]},
   lit:{name:"Literatura",ico:"📰",grad:"linear-gradient(135deg,#7C3AED,#EC4899)",pill:{bg:"#EDE9FE",bo:"#C4B5FD",co:"#5B21B6"},hc:[124,58,237]},
   eng:{name:"English",ico:"🇬🇧",grad:"linear-gradient(135deg,#1D4ED8,#0EA5E9)",pill:{bg:"#EFF6FF",bo:"#93C5FD",co:"#1D4ED8"},hc:[29,78,216]},
-  sci:{name:"Ciências",ico:"🔬",grad:"linear-gradient(135deg,#059669,#10B981)",pill:{bg:"#D1FAE5",bo:"#6EE7B7",co:"#065F46"},hc:[5,150,105]}
+  sci:{name:"Ciências",ico:"🔬",grad:"linear-gradient(135deg,#059669,#10B981)",pill:{bg:"#D1FAE5",bo:"#6EE7B7",co:"#065F46"},hc:[5,150,105]},
+  geo:{name:"Geografia",ico:"🌊",grad:"linear-gradient(135deg,#0EA5E9,#2563EB)",pill:{bg:"#E0F2FE",bo:"#7DD3FC",co:"#0369A1"},hc:[14,165,233]}
 };
 
 const TIPS={
@@ -250,7 +255,11 @@ const TIPS={
   "Equação Química":"Reagentes (esquerda) → Produtos (direita). A seta significa 'produz'.",
   "Evidências Químicas":"Formação de gás (bolhas), precipitado, mudança de cor, liberação de calor/luz.",
   "Reações Endo e Exotérmicas":"EXOTÉRMICA: libera calor (queima). ENDOTÉRMICA: absorve calor (fotossíntese, gelo instantâneo).",
-  "Tipos de Reação":"SÍNTESE: A+B→AB (une). DECOMPOSIÇÃO: AB→A+B (divide)."
+  "Tipos de Reação":"SÍNTESE: A+B→AB (une). DECOMPOSIÇÃO: AB→A+B (divide).",
+  "Ciclo da Água":"Evaporação → Condensação → Precipitação → Infiltração/Escoamento → volta ao início.",
+  "Corpos de Água":"Rio, lago, oceano, mar, lagoa, lençol freático, aquífero.",
+  "Bacias Hidrográficas":"Bacia = área drenada por um rio principal + afluentes. Rio perene flui sempre; intermitente só na chuva.",
+  "Rios":"Rio de planalto: rápido, quedas, hidrelétricas. Rio de planície: lento, navegação."
 };
 
 const QS={
@@ -383,11 +392,30 @@ sci:[
   {type:"vf",emoji:"💥",theme:"Tipos de Reação",text:"VERDADEIRO ou FALSO:\nA decomposição da água em hidrogênio e oxigênio é um exemplo de reação de síntese.",correct:false,explain:"FALSO! Isso é DECOMPOSIÇÃO: H₂O → H₂ + O₂. Uma substância (água) se divide em duas (hidrogênio e oxigênio). Síntese seria o processo inverso!"},
   {type:"multi",emoji:"🔄",theme:"Tipos de Reação",text:"Identifique o tipo de reação: 2H₂ + O₂ → 2H₂O",options:["Decomposição","Síntese (adição)","Simples troca","Dupla troca"],correct:1,explain:"2H₂ + O₂ → 2H₂O é SÍNTESE (adição)! Duas substâncias (H₂ e O₂) se unem para formar uma (H₂O). Fórmula: A + B → AB."},
   {type:"multi",emoji:"🔄",theme:"Tipos de Reação",text:"Identifique o tipo de reação: 2H₂O → 2H₂ + O₂",options:["Síntese","Adição","Decomposição","Neutralização"],correct:2,explain:"2H₂O → 2H₂ + O₂ é DECOMPOSIÇÃO! Uma substância (H₂O) se divide em duas (H₂ e O₂). Fórmula: AB → A + B."},
-  {type:"multi",emoji:"📊",theme:"Tipos de Reação",text:"Qual é a diferença entre reação de síntese e reação de decomposição?",options:["São a mesma coisa com nomes diferentes","Na síntese substâncias se unem; na decomposição uma substância se divide","Na síntese usa-se calor; na decomposição usa-se frio","Síntese é física; decomposição é química"],correct:1,explain:"SÍNTESE: A + B → AB (substâncias se UNEM). DECOMPOSIÇÃO: AB → A + B (substância se DIVIDE). São processos opostos! 🔄"}
+  {type:"multi",emoji:"📊",theme:"Tipos de Reação",text:"Qual é a diferença entre reação de síntese e reação de decomposição?",options:["São a mesma coisa com nomes diferentes","Na síntese substâncias se unem; na decomposição uma substância se divide","Na síntese usa-se calor; na decomposição usa-se frio","Síntese é física; decomposição é química"],correct:1,explain:"SÍNTESE: A + B → AB (substâncias se UNEM). DECOMPOSIÇÃO: AB → A + B (substância se DIVIDE). São processos opostos! 🔄"}],
+geo:[
+  {type:"multi",emoji:"💧",theme:"Ciclo da Água",text:"O ciclo da água garante a circulação da água entre a atmosfera, a superfície e os seres vivos. Qual alternativa apresenta corretamente uma das etapas?",options:["Fotossíntese","Evaporação","Respiração","Combustão"],correct:1,explain:"EVAPORAÇÃO é uma etapa do ciclo da água! O calor do Sol aquece a água dos rios e oceanos, transformando-a em vapor que sobe para a atmosfera."},
+  {type:"multi",emoji:"☀️",theme:"Ciclo da Água",text:"A energia do Sol aquece rios, lagos e oceanos, provocando a mudança do estado líquido para o gasoso. Esse processo é chamado de:",options:["Condensação","Infiltração","Evaporação","Precipitação"],correct:2,explain:"EVAPORAÇÃO é quando o calor do Sol transforma a água líquida em vapor d'água. É o início do ciclo hidrológico!"},
+  {type:"multi",emoji:"☁️",theme:"Ciclo da Água",text:"Após a evaporação, o vapor d'água sobe para a atmosfera, esfria e forma gotículas que originam as nuvens. Esse processo é chamado de:",options:["Precipitação","Condensação","Evaporação","Transpiração"],correct:1,explain:"CONDENSAÇÃO é quando o vapor d'água esfria nas camadas altas da atmosfera e se transforma em minúsculas gotículas, formando as nuvens!"},
+  {type:"multi",emoji:"🌧️",theme:"Ciclo da Água",text:"Quando as gotículas de água nas nuvens ficam pesadas e caem para a superfície terrestre, esse processo é chamado de:",options:["Evaporação","Condensação","Precipitação","Infiltração"],correct:2,explain:"PRECIPITAÇÃO é quando a água das nuvens cai para a superfície na forma de chuva, neve ou granizo. Fundamental para abastecer rios e solos!"},
+  {type:"vf",emoji:"💧",theme:"Ciclo da Água",text:"VERDADEIRO ou FALSO:\nO ciclo da água é um processo contínuo que nunca para.",correct:true,explain:"VERDADEIRO! O ciclo da água é contínuo: evaporação → condensação → precipitação → escoamento → evaporação novamente. Nunca para!"},
+  {type:"multi",emoji:"💦",theme:"Ciclo da Água",text:"Quando a água da chuva penetra no solo e abastece os lençóis freáticos, esse processo é chamado de:",options:["Evaporação","Condensação","Precipitação","Infiltração"],correct:3,explain:"INFILTRAÇÃO é quando a água da chuva penetra no solo, abastecendo os lençóis freáticos e aquíferos subterrâneos!"},
+  {type:"vf",emoji:"🌿",theme:"Ciclo da Água",text:"VERDADEIRO ou FALSO:\nAs plantas participam do ciclo da água através da transpiração.",correct:true,explain:"VERDADEIRO! As plantas liberam vapor d'água pelas folhas (transpiração), contribuindo para o ciclo da água na atmosfera!"},
+  {type:"multi",emoji:"🌊",theme:"Corpos de Água",text:"Qual das alternativas define corretamente um rio?",options:["Massa de água parada cercada de terra","Curso de água doce que flui continuamente pelo relevo","Região de água salgada entre continentes","Reservatório artificial construído pelo homem"],correct:1,explain:"Rio é um CURSO DE ÁGUA DOCE que flui continuamente pelo relevo, da nascente até a foz!"},
+  {type:"multi",emoji:"🏞️",theme:"Corpos de Água",text:"Uma massa de água doce parada, cercada de terra por todos os lados, é chamada de:",options:["Rio","Oceano","Lago","Baía"],correct:2,explain:"LAGO é uma massa de água doce parada, cercada de terra. Diferente do rio, que flui!"},
+  {type:"vf",emoji:"🌊",theme:"Corpos de Água",text:"VERDADEIRO ou FALSO:\nOs oceanos contêm água salgada e cobrem a maior parte da superfície terrestre.",correct:true,explain:"VERDADEIRO! Os oceanos cobrem cerca de 71% da superfície da Terra e contêm água salgada. São 5 oceanos: Pacífico, Atlântico, Índico, Ártico e Antártico!"},
+  {type:"multi",emoji:"💧",theme:"Corpos de Água",text:"A água subterrânea armazenada em camadas porosas do solo é chamada de:",options:["Rio subterrâneo","Aquífero","Lagoa costeira","Delta"],correct:1,explain:"AQUÍFERO é uma camada de rocha ou solo poroso que armazena água subterrânea. São fontes importantes de água potável!"},
+  {type:"multi",emoji:"🗺️",theme:"Bacias Hidrográficas",text:"O que é uma bacia hidrográfica?",options:["Um tipo de rio profundo","Um conjunto de mares conectados","Uma área drenada por um rio principal e seus afluentes","Um reservatório artificial de água"],correct:2,explain:"Bacia hidrográfica é uma ÁREA DRENADA POR UM RIO PRINCIPAL e seus afluentes, delimitada por divisores de relevo!"},
+  {type:"multi",emoji:"🌊",theme:"Bacias Hidrográficas",text:"Os rios menores que deságuam no rio principal de uma bacia hidrográfica são chamados de:",options:["Nascentes","Afluentes","Estuários","Aquíferos"],correct:1,explain:"AFLUENTES são os rios menores que deságuam no rio principal, contribuindo com mais água. Ex: Rio Tietê é afluente do Rio Paraná!"},
+  {type:"multi",emoji:"💧",theme:"Bacias Hidrográficas",text:"Rios que mantêm água corrente durante TODAS as estações do ano, independentemente das chuvas, são classificados como:",options:["Intermitente","Temporário","Perene","Subterrâneo"],correct:2,explain:"Rio PERENE mantém água o ano todo. Ex: Rio Amazonas. Alimentados por lençóis freáticos profundos!"},
+  {type:"multi",emoji:"🏜️",theme:"Bacias Hidrográficas",text:"Rios que secam no período de seca e voltam a ter água apenas no período chuvoso são chamados de:",options:["Perene","Intermitente","Subterrâneo","Glacial"],correct:1,explain:"Rio INTERMITENTE seca na estiagem e volta na época das chuvas. São comuns no Nordeste brasileiro!"},
+  {type:"multi",emoji:"⚡",theme:"Bacias Hidrográficas",text:"Rios de planalto apresentam maior velocidade e quedas d'água. Uma função importante desses rios é:",options:["Facilitar a navegação","Produzir energia hidrelétrica","Formar grandes deltas","Abastecer apenas aquíferos"],correct:1,explain:"Rios de PLANALTO têm grande velocidade e quedas — ideais para produzir ENERGIA HIDRELÉTRICA! Ex: Usina de Itaipu no Rio Paraná."},
+  {type:"multi",emoji:"🚢",theme:"Bacias Hidrográficas",text:"Rios de planície apresentam menor velocidade e são comuns em áreas de relevo plano. Uma característica desses rios é:",options:["Forte presença de cachoeiras","Alta velocidade da água","Maior facilidade para navegação","Ausência de sedimentos"],correct:2,explain:"Rios de PLANÍCIE têm água lenta e calma — ideais para NAVEGAÇÃO! Ex: Rio Amazonas em sua foz."},
+  {type:"vf",emoji:"🗺️",theme:"Bacias Hidrográficas",text:"VERDADEIRO ou FALSO:\nA bacia hidrográfica é delimitada por divisores de relevo, como serras e planaltos.",correct:true,explain:"VERDADEIRO! Os divisores de relevo (serras, planaltos) separam uma bacia de outra, determinando para onde a água das chuvas escoa!"}
 ]
 };
 
-const TOTAL={hist:15,lit:15,eng:15,sci:15};
+const TOTAL={hist:15,lit:15,eng:15,sci:15,geo:15};
 let curSubj=null,qs=[],idx=0,score=0,corr=0,wrng=0;
 let wq=[],wqs=[],answered=false,retry=false,total=15;
 let tstat={};
@@ -402,7 +430,7 @@ function selSubj(s){
   const btn=document.getElementById('btn-play');
   btn.classList.add('rdy');
   btn.textContent='Estudar '+SUBJ[s].name+'! 🚀';
-  btn.style.color=s==='hist'?'#0F766E':s==='lit'?'#5B21B6':s==='eng'?'#1D4ED8':'#065F46';
+  btn.style.color=s==='hist'?'#0F766E':s==='lit'?'#5B21B6':s==='eng'?'#1D4ED8':s==='sci'?'#065F46':'#0369A1';
 }
 
 function startGame(){

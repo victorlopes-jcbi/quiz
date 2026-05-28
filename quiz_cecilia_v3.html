@@ -168,6 +168,10 @@ button{font-family:inherit;}
         <span class="sc-ico">🇬🇧</span>
         <div><div class="sc-name">English</div><div class="sc-desc">Time, Weather, Life Stages &amp; Materials</div></div>
       </button>
+      <button type="button" class="subj-card" onclick="selSubj('sci')" ontouchend="event.preventDefault();selSubj('sci')" id="card-sci">
+        <span class="sc-ico">🔬</span>
+        <div><div class="sc-name">Ciências</div><div class="sc-desc">Seres vivos, animais e meio ambiente</div></div>
+      </button>
     </div>
     <button class="btn-play" id="btn-play" onclick="startGame()" ontouchend="event.preventDefault();startGame()">Vamos jogar! 🚀</button>
   </div>
@@ -233,7 +237,8 @@ const SUBJ={
   geo:{name:"Geografia",ico:"🌍",grad:"linear-gradient(160deg,#1BA870,#4A90D9)",pill:{bg:"#E8FBF3",bo:"#5DCAA5",co:"#085041"},hc:[27,168,112]},
   hist:{name:"História",ico:"🏘️",grad:"linear-gradient(160deg,#F97316,#FBBF24)",pill:{bg:"#FFF7ED",bo:"#FCD34D",co:"#7C2D12"},hc:[249,115,22]},
   port:{name:"Português",ico:"📖",grad:"linear-gradient(160deg,#5B21B6,#EC4899)",pill:{bg:"#EDE9FE",bo:"#C4B5FD",co:"#5B21B6"},hc:[92,33,182]},
-  eng:{name:"English",ico:"🇬🇧",grad:"linear-gradient(160deg,#1D4ED8,#0EA5E9)",pill:{bg:"#EFF6FF",bo:"#93C5FD",co:"#1D4ED8"},hc:[29,78,216]}
+  eng:{name:"English",ico:"🇬🇧",grad:"linear-gradient(160deg,#1D4ED8,#0EA5E9)",pill:{bg:"#EFF6FF",bo:"#93C5FD",co:"#1D4ED8"},hc:[29,78,216]},
+  sci:{name:"Ciências",ico:"🔬",grad:"linear-gradient(160deg,#059669,#10B981)",pill:{bg:"#D1FAE5",bo:"#6EE7B7",co:"#065F46"},hc:[5,150,105]}
 };
 
 const TIPS={
@@ -387,11 +392,43 @@ eng:[
   {type:"multi",emoji:"👨",theme:"Human Life Stages",text:"A person in 'Adulthood' is usually:",translation:"Uma pessoa na 'Adulthood' (fase adulta) geralmente:",options:["Under 12 years old","Between 13 and 19 years old","Between 20 and 64 years old","Over 65 years old"],correct:2,explain:"ADULTHOOD = from about 20 to 64 years old. Adults work, have families and are independent! 👨"},
   {type:"multi",emoji:"👴",theme:"Human Life Stages",text:"'Old age' starts at approximately:",translation:"A 'Old age' (velhice) começa aproximadamente:",options:["20 years old","13 years old","40 years old","65 years old"],correct:3,explain:"OLD AGE starts at around 65 years old. People in old age are called elderly or senior! 👴"},
   {type:"vf",emoji:"📊",theme:"Human Life Stages",text:"TRUE or FALSE:\nThe correct order is: Childhood → Adolescence → Adulthood → Old Age.",translation:"VERDADEIRO ou FALSO:\nA ordem correta é: Infância → Adolescência → Fase adulta → Velhice.",correct:true,explain:"TRUE! Childhood → Adolescence → Adulthood → Old Age is the correct order of human life stages! 🎯"},
-  {type:"multi",emoji:"🎓",theme:"Human Life Stages",text:"During which stage do people usually go to university and start working?",translation:"Durante qual etapa as pessoas geralmente vão para a universidade e começam a trabalhar?",options:["Childhood","Adolescence","Adulthood","Old age"],correct:2,explain:"People start university and work in early ADULTHOOD — around 18 to 25 years old! 🎓"}
+  {type:"multi",emoji:"🎓",theme:"Human Life Stages",text:"During which stage do people usually go to university and start working?",translation:"Durante qual etapa as pessoas geralmente vão para a universidade e começam a trabalhar?",options:["Childhood","Adolescence","Adulthood","Old age"],correct:2,explain:"People start university and work in early ADULTHOOD — around 18 to 25 years old! 🎓"}],
+sci:[
+  // SERES VIVOS
+  {type:"multi",emoji:"🌿",theme:"Seres Vivos",text:"O que é um ser vivo?",options:["Qualquer coisa que se move","Ser que nasce, cresce, se reproduz e morre","Qualquer objeto encontrado na natureza","Substância formada por minerais"],correct:1,explain:"Seres vivos nascem, crescem, se reproduzem e morrem! Animais, plantas e fungos são seres vivos. Pedras e água não são seres vivos."},
+  {type:"multi",emoji:"🌿",theme:"Seres Vivos",text:"Qual dos exemplos abaixo é um ser vivo?",options:["Pedra","Rio","Planta","Nuvem"],correct:2,explain:"A PLANTA é um ser vivo! Ela nasce, cresce, se reproduz e morre. Pedra, rio e nuvem são seres não vivos — não nascem nem morrem."},
+  {type:"vf",emoji:"🌱",theme:"Seres Vivos",text:"VERDADEIRO ou FALSO:\nTodos os seres vivos precisam de água, ar e alimento para sobreviver.",correct:true,explain:"VERDADEIRO! Todos os seres vivos precisam de água, ar (oxigênio) e alimento para sobreviver e crescer. São necessidades básicas da vida!"},
+  {type:"multi",emoji:"🍄",theme:"Seres Vivos",text:"Qual destes NÃO é um ser vivo?",options:["Cachorro","Cogumelo","Árvore","Pedra"],correct:3,explain:"A PEDRA não é um ser vivo! Ela não nasce, não cresce e não se reproduz. Cachorro, cogumelo e árvore são seres vivos."},
+  {type:"vf",emoji:"🌿",theme:"Seres Vivos",text:"VERDADEIRO ou FALSO:\nAs plantas são seres vivos porque nascem, crescem e se reproduzem.",correct:true,explain:"VERDADEIRO! As plantas são seres vivos — nascem de sementes, crescem, produzem flores e frutos (reprodução) e morrem."},
+  {type:"multi",emoji:"🧬",theme:"Seres Vivos",text:"Qual característica é exclusiva dos seres vivos?",options:["Ocupar espaço","Ter peso","Reprodução e crescimento","Ser sólido ou líquido"],correct:2,explain:"Reprodução e crescimento são características exclusivas dos seres vivos! Objetos inanimados como pedras ocupam espaço e têm peso, mas não crescem nem se reproduzem."},
+
+  // CARACTERÍSTICAS DOS ANIMAIS
+  {type:"multi",emoji:"🐔",theme:"Características dos Animais",text:"A galinha é coberta por:",options:["Pelos","Penas","Escamas","Carapaça"],correct:1,explain:"A galinha é coberta por PENAS! Aves (pássaros, galinhas, pinguins) têm penas. Mamíferos têm pelos, peixes têm escamas e tartarugas têm carapaça."},
+  {type:"multi",emoji:"🐟",theme:"Características dos Animais",text:"Os peixes são cobertos por:",options:["Pelos","Penas","Escamas","Pelo liso"],correct:2,explain:"Os peixes são cobertos por ESCAMAS! As escamas protegem o corpo do peixe e ajudam no movimento dentro da água."},
+  {type:"multi",emoji:"🐶",theme:"Características dos Animais",text:"Os cães, gatos e leões são cobertos por:",options:["Penas","Escamas","Pelos","Carapaça"],correct:2,explain:"Cães, gatos e leões são mamíferos e são cobertos por PELOS! Os pelos protegem o corpo e ajudam a manter a temperatura."},
+  {type:"multi",emoji:"🌊",theme:"Características dos Animais",text:"Animais que vivem na água são chamados de:",options:["Terrestres","Aquáticos","Aéreos","Anfíbios"],correct:1,explain:"Animais que vivem na água são chamados de AQUÁTICOS! Ex: peixe, baleia, golfinho, polvo. Aquático vem de 'aqua' = água!"},
+  {type:"multi",emoji:"🦁",theme:"Características dos Animais",text:"Animais que vivem na terra firme são chamados de:",options:["Aquáticos","Aéreos","Terrestres","Subterrâneos"],correct:2,explain:"Animais que vivem na terra são TERRESTRES! Ex: leão, elefante, cachorro, formiga. Eles respiram ar e se locomovem no solo."},
+  {type:"multi",emoji:"🦅",theme:"Características dos Animais",text:"As aves como a águia e o beija-flor passam a maior parte do tempo voando. São animais:",options:["Aquáticos","Terrestres","Aéreos","Anfíbios"],correct:2,explain:"Aves que passam a maior parte do tempo voando são chamadas de AÉREOS! Elas têm asas e penas adaptadas para o voo."},
+  {type:"vf",emoji:"🐊",theme:"Características dos Animais",text:"VERDADEIRO ou FALSO:\nOs anfíbios como sapos e rãs vivem tanto na água quanto na terra.",correct:true,explain:"VERDADEIRO! ANFÍBIOS vivem nos dois ambientes — nascem na água (girinos) e quando adultos vivem na terra e na água. Ex: sapo, rã, salamandra."},
+  {type:"multi",emoji:"🐟",theme:"Características dos Animais",text:"Qual animal se encaixa corretamente na descrição: 'coberto de escamas, vive na água e respira por brânquias'?",options:["Baleia","Golfinho","Peixe","Sapo"],correct:2,explain:"O PEIXE tem escamas, vive na água e respira por brânquias (que filtram o oxigênio da água). Baleia e golfinho são mamíferos aquáticos que respiram ar!"},
+  {type:"multi",emoji:"🦁",theme:"Características dos Animais",text:"Como se chamam os animais que se alimentam apenas de plantas?",options:["Carnívoros","Onívoros","Herbívoros","Decompositores"],correct:2,explain:"Animais que comem apenas plantas são HERBÍVOROS! Ex: vaca, cavalo, coelho, girafa. Herbívoro vem de 'herba' = planta!"},
+  {type:"multi",emoji:"🐺",theme:"Características dos Animais",text:"O leão se alimenta de outros animais. Ele é classificado como:",options:["Herbívoro","Onívoro","Carnívoro","Decompositor"],correct:2,explain:"O leão é CARNÍVORO — se alimenta de carne (outros animais). Carnívoro vem de 'carne' + 'vorare' (devorar). Ex: leão, lobo, tubarão."},
+  {type:"vf",emoji:"🐻",theme:"Características dos Animais",text:"VERDADEIRO ou FALSO:\nO urso é onívoro porque come tanto plantas (frutas, mel) quanto animais (peixes).",correct:true,explain:"VERDADEIRO! O urso é ONÍVORO — come de tudo, plantas e animais. Onívoro vem de 'omni' (tudo). Humanos também são onívoros!"},
+
+  // MEIO AMBIENTE
+  {type:"multi",emoji:"🌍",theme:"Meio Ambiente",text:"O que é o meio ambiente?",options:["Apenas as florestas e os animais selvagens","Tudo que nos rodeia — seres vivos, água, ar, solo e as relações entre eles","Somente as cidades e construções humanas","Apenas os rios e oceanos do planeta"],correct:1,explain:"Meio ambiente é TUDO que nos rodeia — os seres vivos, a água, o ar, o solo e as relações entre todos eles. Inclui tanto o natural quanto o criado pelo homem!"},
+  {type:"multi",emoji:"🌲",theme:"Meio Ambiente",text:"Uma floresta é um exemplo de meio ambiente:",options:["Artificial — criado pelo homem","Natural — existe sem a intervenção humana","Urbano — construído nas cidades","Industrial — criado para produção"],correct:1,explain:"A floresta é meio ambiente NATURAL! Ela existe sem precisar da intervenção humana — é formada por árvores, animais e rios que se desenvolveram sozinhos."},
+  {type:"multi",emoji:"🏫",theme:"Meio Ambiente",text:"Uma escola é um exemplo de meio ambiente:",options:["Natural","Aquático","Artificial — criado pelo homem","Selvagem"],correct:2,explain:"A escola é meio ambiente ARTIFICIAL — foi construída pelo homem! Prédios, cidades, estradas e parques urbanos são ambientes artificiais."},
+  {type:"multi",emoji:"🏔️",theme:"Meio Ambiente",text:"Qual dos exemplos abaixo é um ambiente NATURAL?",options:["Prédio","Escola","Rio","Estrada"],correct:2,explain:"O RIO é um ambiente natural — existe sem intervenção humana! Prédio, escola e estrada são criados pelo homem (ambientes artificiais)."},
+  {type:"vf",emoji:"🏙️",theme:"Meio Ambiente",text:"VERDADEIRO ou FALSO:\nUma cidade com prédios e ruas é um exemplo de meio ambiente artificial.",correct:true,explain:"VERDADEIRO! Cidades, prédios, ruas e escolas são ambientes ARTIFICIAIS — foram construídos pelo homem. A natureza não os criou sozinha!"},
+  {type:"multi",emoji:"🌿",theme:"Meio Ambiente",text:"Pelo que é composto o meio ambiente NATURAL?",options:["Prédios, ruas e fábricas","Rios, florestas, montanhas, animais e plantas","Escolas, hospitais e parques urbanos","Computadores, carros e aviões"],correct:1,explain:"O meio ambiente natural é composto por rios, florestas, montanhas, animais e plantas — tudo que existe sem a intervenção do homem!"},
+  {type:"multi",emoji:"🏗️",theme:"Meio Ambiente",text:"Pelo que é composto o meio ambiente CRIADO PELO HOMEM (artificial)?",options:["Florestas e rios","Montanhas e vulcões","Prédios, estradas, escolas e cidades","Oceanos e planícies"],correct:2,explain:"O meio ambiente artificial é composto por prédios, estradas, escolas, cidades e fábricas — tudo que o ser humano construiu!"},
+  {type:"multi",emoji:"🗂️",theme:"Meio Ambiente",text:"Classifique corretamente:\nFloresta | Rio | Escola | Prédio | Montanha",options:["Todos são naturais","Todos são artificiais","Floresta, Rio e Montanha são naturais; Escola e Prédio são artificiais","Escola e Rio são naturais; os outros são artificiais"],correct:2,explain:"NATURAL: Floresta, Rio e Montanha (existem sem o homem). ARTIFICIAL: Escola e Prédio (construídos pelo homem). É a diferença entre o que a natureza cria e o que o homem constrói!"},
+  {type:"vf",emoji:"🌊",theme:"Meio Ambiente",text:"VERDADEIRO ou FALSO:\nUma montanha é um ambiente criado pelo homem.",correct:false,explain:"FALSO! A montanha é um ambiente NATURAL — foi formada por processos geológicos da Terra ao longo de milhões de anos, sem intervenção humana!"}
 ]
 };
 
-const TOTAL={geo:10,hist:15,port:15,eng:10};
+const TOTAL={geo:10,hist:15,port:15,eng:10,sci:10};
 let curSubj=null,qs=[],idx=0,score=0,corr=0,wrng=0;
 let wq=[],wqs=[],answered=false,retry=false,total=0;
 let tstat={};
@@ -406,7 +443,7 @@ function selSubj(s){
   const btn=document.getElementById('btn-play');
   btn.classList.add('rdy');
   btn.textContent='Estudar '+SUBJ[s].name+'! 🚀';
-  btn.style.color=s==='geo'?'#1BA870':s==='hist'?'#F97316':s==='port'?'#7C3AED':'#1D4ED8';
+  btn.style.color=s==='geo'?'#1BA870':s==='hist'?'#F97316':s==='port'?'#7C3AED':s==='eng'?'#1D4ED8':'#065F46';
 }
 
 function startGame(){
